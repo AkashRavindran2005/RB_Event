@@ -1,0 +1,25 @@
+<?php
+// ========================
+// CyberTech Solutions
+// Configuration Backup
+// Created: 2024-03-15
+// ========================
+
+// Database Configuration (OLD - DO NOT USE)
+// $db_host = "db.internal.cybertech.local";
+// $db_user = "admin_legacy";
+// $db_pass = "Cyb3rT3ch_2024!";
+
+// API Keys (revoked)
+// $stripe_key = "sk_live_xxxxxxxxxxxxx";
+// $sendgrid_key = "SG.xxxxxxxxxxxxx";
+
+// Admin credentials for testing
+// Username: admin
+// Password: admin123
+
+// Secret flag for CTF
+// FLAG{b4ckup_f1l3s_l34k_s3cr3ts}
+
+// Note to self: Delete this file before deployment!
+?>
