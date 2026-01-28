@@ -2,7 +2,7 @@
 include 'includes/config.php';
 
 // Flag hidden in response headers - check with browser dev tools or curl!
-header('X-Custom-Flag: FLAG{h34d3r5_t3ll_s3cr3ts}');
+header('X-Custom-Flag: CCEE{h34d3r5_t3ll_s3cr3ts}');
 header('X-Debug-Info: CTF-Mode-Enabled');
 header('X-Powered-By: CyberTech-Legacy-v1.0');
 

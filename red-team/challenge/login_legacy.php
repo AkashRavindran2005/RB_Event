@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['username'] = $row['username'];
         $_SESSION['role'] = $row['role'];
 
-        $success = "Login successful! Welcome " . $row['username'] . ". Here's your reward: FLAG{sql_1nj3ct10n_m4st3r}";
+        $success = "Login successful! Welcome " . $row['username'] . ". Here's your reward: CCEE{sql_1nj3ct10n_m4st3r}";
 
         if ($row['role'] == 'admin') {
             $success .= " <br><a href='admin.php' class='btn btn-primary mt-3'>Go to Admin Panel</a>";

@@ -7,7 +7,7 @@ header('Content-Type: application/json');
 $data_dir = '/tmp/ctf_data';
 if (!is_dir($data_dir)) {
     mkdir($data_dir, 0755, true);
-    file_put_contents($data_dir . '/flag.txt', 'FLAG{c0mm4nd_1nj3ct10n_r00t}');
+    file_put_contents($data_dir . '/flag.txt', 'CCEE{c0mm4nd_1nj3ct10n_r00t}');
     file_put_contents($data_dir . '/services.txt', "red-teaming\nblue-teaming\npenetration-testing\nsecurity-audit\nincident-response");
 }
 

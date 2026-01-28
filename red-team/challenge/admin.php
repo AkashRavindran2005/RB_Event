@@ -1,6 +1,6 @@
 <?php
 include 'includes/config.php';
-// FLAG{c00k13_m0nst3r_4dm1n} - found the admin source
+// CCEE{c00k13_m0nst3r_4dm1n} - found the admin source
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header('Location: login.php');

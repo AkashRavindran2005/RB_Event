@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             eval(debugParam);
             // Try: ?debug=alert('XSS')
-            // Or: ?debug=console.log('FLAG{cl13nt_s1d3_xss}')
+            // Or: ?debug=console.log('CCEE{cl13nt_s1d3_xss}')
         } catch (e) {
             console.error('Debug error:', e);
         }
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     console.log('%cDeveloper Note:', 'color: red; font-weight: bold;');
     console.log('Remember to remove debug endpoints before production!');
-    console.log('FLAG{c0ns0l3_l0g_l34k}');
+    console.log('CCEE{c0ns0l3_l0g_l34k}');
 
 });
 
@@ -175,7 +175,7 @@ function makeAPIRequest(endpoint, data, callback) {
 // Vulnerable localStorage usage - stores sensitive data
 function saveUserPreferences(preferences) {
     localStorage.setItem('userPrefs', JSON.stringify(preferences));
-    localStorage.setItem('apiKey', 'sk_live_abc123def456'); // FLAG{l0c4l_st0r4g3_s3cr3ts}
+    localStorage.setItem('apiKey', 'sk_live_abc123def456'); // CCEE{l0c4l_st0r4g3_s3cr3ts}
     localStorage.setItem('sessionToken', Math.random().toString(36).substr(2, 9));
 }
 
@@ -250,7 +250,7 @@ window.CyberTech = {
 
 window.DEV_MODE = true;
 window.API_BASE_URL = 'https://api.cybertech-solutions.com';
-window.ADMIN_PANEL_URL = '/admin.php?key=d3v_4cc3ss_2024'; // FLAG{d3v_m0d3_3xp0s3d}
+window.ADMIN_PANEL_URL = '/admin.php?key=d3v_4cc3ss_2024'; // CCEE{d3v_m0d3_3xp0s3d}
 
 console.log('%c⚠️ Development Mode Enabled', 'color: orange; font-weight: bold;');
 console.log('Admin access: ' + window.ADMIN_PANEL_URL);

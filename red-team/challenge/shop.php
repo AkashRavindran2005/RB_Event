@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['item_id'])) {
             mysqli_query($conn, "UPDATE users SET credits = $new_credits WHERE id = $user_id");
 
             if ($item['name'] == 'CTF Flag' && $quantity > 0) {
-                $message = "You bought the flag! Here it is: FLAG{l0g1c_fl4w_sh0pp1ng_spr33}";
+                $message = "You bought the flag! Here it is: CCEE{l0g1c_fl4w_sh0pp1ng_spr33}";
             } else if ($quantity < 0) {
                 $message = "Interesting... you 'returned' " . abs($quantity) . " x " . $item['name'] . " and gained $" . abs($total_cost) . " credits!";
             } else {

@@ -44,5 +44,5 @@ if (!function_exists('getUserCredits')) {
 // REMOVED: getUserScore and isFlagSolved (Moved to CTF Platform)
 
 // Flag hidden in config comments
-// FLAG{c0nf1g_f1l3s_4r3_tr34sur3s}
+// CCEE{c0nf1g_f1l3s_4r3_tr34sur3s}
 ?>
