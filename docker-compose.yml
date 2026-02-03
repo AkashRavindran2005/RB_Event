@@ -5,6 +5,8 @@ services:
     build: .
     ports:
       - "8000:80"
+    volumes:
+      - ./challenge:/var/www/html/challenge
     depends_on:
       - db
     environment:

@@ -1,10 +1,6 @@
 <?php
 include 'includes/config.php';
 
-// Vulnerability: LFI with PHP Wrapper support
-// Attackers can use php://filter/convert.base64-encode/resource=login.php
-// to read source code of files.
-
 if (isset($_GET['page'])) {
     $file = $_GET['page'];
 

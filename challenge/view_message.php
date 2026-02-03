@@ -13,9 +13,10 @@ if (isset($_GET['id'])) {
     $msg_id = $_GET['id'];
     $query = "SELECT * FROM messages WHERE id = $msg_id";
     $result = mysqli_query($conn, $query);
-    $message_data = mysqli_fetch_assoc($result);
 
-    if (!$message_data) {
+    if ($result && mysqli_num_rows($result) > 0) {
+        $message_data = mysqli_fetch_assoc($result);
+    } else {
         $error = "Message not found.";
     }
 }

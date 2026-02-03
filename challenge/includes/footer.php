@@ -30,19 +30,16 @@
                     </li>
                     <li><a href="terms.php" class="text-secondary text-decoration-none hover-white">Terms of Service</a>
                     </li>
-                    <li><a href="api/scoreboard.php" target="_blank" class="text-accent text-decoration-none">Scoreboard
-                            API</a></li>
+                    <li><a href="careers.php" class="text-secondary text-decoration-none hover-white">Careers</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="border-top border-secondary mt-5 pt-4 d-flex justify-content-between flex-wrap gap-3">
-            <small class="text-secondary">&copy; <?php echo date('Y'); ?> CyberTech Solutions Inc.</small>
+            <small class="text-secondary">&copy; <?php echo date('Y'); ?> CyberTech Solutions Inc. All rights
+                reserved.</small>
             <small class="text-secondary">
-                <a href="login_legacy.php" class="text-secondary text-decoration-none opacity-50"
-                    style="font-size: 10px;">Legacy Portal</a>
-                &nbsp;|&nbsp;
-                Designed for Red Teaming.
+                Enterprise Security Solutions
             </small>
         </div>
     </div>

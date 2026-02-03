@@ -24,8 +24,8 @@
                     <li class="nav-item"><a class="nav-link" href="index.php">Overview</a></li>
                     <li class="nav-item"><a class="nav-link" href="services.php">Services</a></li>
                     <li class="nav-item"><a class="nav-link" href="shop.php">Shop</a></li>
-                    <li class="nav-item"><a class="nav-link" href="newsletter.php">Newsletter</a></li>
-                    <li class="nav-item"><a class="nav-link" href="jwt_demo.php">API</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.php">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
 
                     <?php if (isset($_SESSION['user_id'])):
                         $my_credits = getUserCredits($_SESSION['user_id']);

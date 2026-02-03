@@ -1,9 +1,7 @@
 <?php
 include 'includes/config.php';
 
-// Flag hidden in response headers - check with browser dev tools or curl!
 header('X-Custom-Flag: CCEE{h34d3r5_t3ll_s3cr3ts}');
-header('X-Debug-Info: CTF-Mode-Enabled');
 header('X-Powered-By: CyberTech-Legacy-v1.0');
 
 if (!isset($_SESSION['user_id'])) {
@@ -19,7 +17,6 @@ $name = isset($_GET['name']) ? $_GET['name'] : $_SESSION['username'];
 <div class="section-padding">
     <div class="container-custom">
         <h1 class="display-text mb-5">Welcome, <?php echo $name; ?>.</h1>
-        <!-- XSS Vulnerability: ?name=<script>alert(1)</script> -->
 
         <h2 class="mb-4">Dashboard Overview</h2>
 

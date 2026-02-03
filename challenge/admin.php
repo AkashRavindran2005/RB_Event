@@ -1,6 +1,6 @@
 <?php
 include 'includes/config.php';
-// CCEE{c00k13_m0nst3r_4dm1n} - found the admin source
+
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header('Location: login.php');
@@ -47,14 +47,12 @@ include 'includes/header.php';
 
                     <div class="bg-black p-4 rounded border border-secondary" style="min-height: 400px;">
                         <?php
-                        // Intentionally vulnerable to LFI
                         if (file_exists($page . '.php')) {
                             ob_start();
                             include($page . '.php');
                             $content = ob_get_clean();
                             echo $content;
                         } else {
-                            // Try to include any file (The actual vulnerability)
                             echo "<pre class='text-secondary mb-0'>";
                             @include($page);
                             echo "</pre>";

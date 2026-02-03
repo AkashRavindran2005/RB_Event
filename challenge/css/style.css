@@ -173,20 +173,47 @@ h3 {
     padding: 80px 0;
 }
 
-.form-control {
-    background: #1d1d1f;
-    border: 1px solid #424245;
-    color: #FFF;
+.form-control,
+input.form-control,
+textarea.form-control,
+select.form-control {
+    background: #1d1d1f !important;
+    border: 1px solid #424245 !important;
+    color: #FFFFFF !important;
     font-size: 16px;
     padding: 12px;
     border-radius: 8px;
 }
 
-.form-control:focus {
-    background: #2c2c2e;
-    border-color: #2997ff;
-    color: #FFF;
+.form-control:focus,
+input.form-control:focus,
+textarea.form-control:focus,
+select.form-control:focus {
+    background: #2c2c2e !important;
+    border-color: #2997ff !important;
+    color: #FFFFFF !important;
     box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.3);
+    outline: none;
+}
+
+.form-control::placeholder,
+input.form-control::placeholder,
+textarea.form-control::placeholder {
+    color: #a1a1a6 !important;
+    opacity: 1 !important;
+}
+
+.form-control:focus::placeholder,
+input.form-control:focus::placeholder,
+textarea.form-control:focus::placeholder {
+    color: #b1b1b6 !important;
+    opacity: 1 !important;
+}
+
+/* Ensure select options are visible */
+select.form-control option {
+    background: #1d1d1f;
+    color: #FFFFFF;
 }
 
 footer {
