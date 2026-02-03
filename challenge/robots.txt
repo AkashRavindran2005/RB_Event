@@ -1,0 +1,22 @@
+# CyberTech Solutions - robots.txt
+# Please respect our wishes and don't index these pages
+
+User-agent: *
+Disallow: /admin.php
+Disallow: /admin_*
+Disallow: /api/
+Disallow: /api/auth.php
+Disallow: /includes/
+Disallow: /includes/ssti_flag.txt
+Disallow: /config.php.bak
+Disallow: /login_legacy.php
+Disallow: /exploits/
+Disallow: /.git/
+
+# Development notes:
+# - Remember to check login_legacy.php for SQL issues
+# - api/search.php needs input sanitization
+# - Someone reported config.php.bak is still accessible
+# - New JWT auth API at api/auth.php - beta testing
+# - Newsletter template system needs security review
+# - Profile page CSRF protection still TODO
