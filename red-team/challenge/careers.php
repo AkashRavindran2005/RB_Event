@@ -41,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endif; ?>
 
         <div class="row g-5">
-            <!-- Open Positions -->
             <div class="col-md-7">
                 <h3 class="mb-4">Open Roles</h3>
 
@@ -64,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </div>
 
-            <!-- Application Form -->
             <div class="col-md-5">
                 <div class="bento-card sticky-top" style="top: 100px;">
                     <h3 class="mb-4">Apply Now</h3>

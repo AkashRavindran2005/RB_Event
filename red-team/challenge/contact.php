@@ -50,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </form>
         </div>
 
-        <!-- Recent Messages (XSS) -->
         <h3 class="mb-4 border-top border-secondary pt-5">Public Feed</h3>
         <div class="bento-grid">
             <?php

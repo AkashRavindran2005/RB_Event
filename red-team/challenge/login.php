@@ -95,7 +95,7 @@ include 'includes/header.php';
 </div>
 
 <!-- 
-    Developer Notes (TODO: Remove before production)
+    Notes (TODO: Remove before production)
     - Legacy login at login_legacy.php has known SQL injection issues
     - config.php.bak was supposed to be deleted
     - Search API at api/search.php needs sanitization
