@@ -4,6 +4,7 @@ include 'includes/header.php';
 logActivity('page_view', 'services');
 ?>
 
+<!-- Hero -->
 <div class="section-padding text-center">
     <div class="container-custom">
         <h1 class="display-text mb-4">Our Services</h1>
@@ -15,6 +16,7 @@ logActivity('page_view', 'services');
 <div class="section-padding" style="background: var(--surface-color);">
     <div class="container-custom">
 
+        <!-- Row 1 -->
         <div class="row g-4 mb-5">
             <div class="col-md-6">
                 <div class="bento-card">
@@ -50,6 +52,7 @@ logActivity('page_view', 'services');
             </div>
         </div>
 
+        <!-- Row 2 -->
         <div class="row g-4 mb-5">
             <div class="col-md-6">
                 <div class="bento-card">
@@ -82,7 +85,7 @@ logActivity('page_view', 'services');
             </div>
         </div>
 
-        <!-- Service Search (Vulnerable) -->
+        <!-- Knowledge Base Search -->
         <div class="row pt-5">
             <div class="col-md-12">
                 <div class="bento-card p-5 text-center">
@@ -101,7 +104,7 @@ logActivity('page_view', 'services');
                     <?php
                     if (isset($_GET['search'])) {
                         $search_term = $_GET['search'];
-                        // Vulnerable
+
                         echo "<div class='mt-4 text-start bg-black p-3 rounded border border-secondary'>";
                         echo "<h5 class='text-white'>Results:</h5>";
                         $command = "grep -i '$search_term' /var/www/html/data/services.txt 2>&1";

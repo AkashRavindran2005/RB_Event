@@ -9,12 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $message = $_POST['message'];
 
-    // Stored XSS
     $query = "INSERT INTO messages (name, email, message, created_at) 
               VALUES ('$name', '$email', '$message', NOW())";
     mysqli_query($conn, $query);
 
-    $success = "Msg received!";
+    $success = "Message received! We'll get back to you soon.";
 }
 ?>
 
@@ -22,12 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container-custom" style="max-width: 800px;">
         <div class="text-center mb-5">
             <h1 class="display-text mb-3">Contact Support</h1>
-            <p class="text-secondary" style="font-size: 20px;">We're here to help.</p>
+            <p class="text-secondary" style="font-size: 20px;">We're here to help with your security needs.</p>
         </div>
 
         <?php if ($success): ?>
             <div class="alert alert-success bg-opacity-10 border-success text-success mb-4 text-center">
-                <?php echo $success; ?></div>
+                <?php echo $success; ?>
+            </div>
         <?php endif; ?>
 
         <div class="bento-card p-5 mb-5">
@@ -50,20 +50,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </form>
         </div>
 
-        <h3 class="mb-4 border-top border-secondary pt-5">Public Feed</h3>
+        <h3 class="mb-4 border-top border-secondary pt-5">Public Feedback</h3>
         <div class="bento-grid">
             <?php
             $result = mysqli_query($conn, "SELECT * FROM messages WHERE is_private = 0 ORDER BY created_at DESC LIMIT 6");
             while ($row = mysqli_fetch_assoc($result)):
                 ?>
-                <div class="bento-card p-4">
+                <a href="view_message.php?id=<?php echo $row['id']; ?>" class="bento-card p-4 text-decoration-none"
+                    style="cursor: pointer;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <strong class="text-white"><?php echo htmlspecialchars($row['name']); ?></strong>
                         <small class="text-secondary"><?php echo date('M d', strtotime($row['created_at'])); ?></small>
                     </div>
-                    <!-- VULNERABLE: No htmlspecialchars on message -->
                     <p class="text-secondary mb-0"><?php echo $row['message']; ?></p>
-                </div>
+                </a>
             <?php endwhile; ?>
         </div>
     </div>
