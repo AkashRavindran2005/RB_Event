@@ -1,6 +1,0 @@
-Nice try! But the real flag isn't here anymore.
-
-A true Red Team operator explores the file system.
-Try looking for hidden directories or files...
-
-Hint: What does "ls -la" reveal that "ls" doesn't?

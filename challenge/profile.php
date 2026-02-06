@@ -76,6 +76,13 @@ include 'includes/header.php';
     <div class="container-custom">
         <h1 class="display-text mb-5">Profile Settings</h1>
 
+        <!-- 
+            CSRF Challenge: Notice there are NO csrf_token fields in the forms below!
+            An attacker can create a malicious page that submits these forms on behalf of a logged-in victim.
+            Check exploits/csrf_exploit.html for an example attack.
+            Flag: CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n}
+        -->
+
         <?php if ($success): ?>
             <div class="alert alert-success mb-4">
                 <?php echo htmlspecialchars($success); ?>

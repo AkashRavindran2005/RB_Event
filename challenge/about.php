@@ -91,6 +91,15 @@ $member = isset($_GET['member']) ? $_GET['member'] : '';
 
                 <?php if ($member): ?>
                     <div class="bento-card p-4 mb-4">
+                        <?php
+                        // Check if XSS was triggered (script tag in member param) - show flag FIRST
+                        if (stripos($member, '<script') !== false || stripos($member, 'onerror') !== false || stripos($member, 'onload') !== false || stripos($member, 'javascript:') !== false) {
+                            echo '<div class="mb-3 p-3 rounded" style="background: rgba(0,255,0,0.1); border: 1px solid rgba(0,255,0,0.3);">';
+                            echo '<p class="text-success mb-0"><strong>🎉 XSS Detected!</strong> Flag: <code>CCEE{xss_r3fl3ct3d_4tt4ck}</code></p>';
+                            echo '</div>';
+                            logActivity('xss_success', 'XSS payload executed: ' . substr($member, 0, 100));
+                        }
+                        ?>
                         <h5 class="text-white">Viewing profile: <?php echo $member; ?></h5>
                     </div>
                 <?php endif; ?>

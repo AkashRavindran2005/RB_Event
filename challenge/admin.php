@@ -16,6 +16,20 @@ include 'includes/header.php';
     <div class="container-custom">
         <h1 class="display-text mb-5">Admin Control Panel</h1>
 
+        <?php
+        // Check if user got here via PHP Object Injection (cookie exploit)
+        // Only shows flag when accessed via the exploit path, not normal admin login
+        if (isset($_SESSION['via_cookie_exploit']) && $_SESSION['via_cookie_exploit'] === true) {
+            echo '<div class="alert alert-success mb-4">';
+            echo '<strong>🎉 Congratulations!</strong> You accessed the admin panel via cookie manipulation!<br>';
+            echo 'Flag: <code>CCEE{c00k13_m0nst3r_4dm1n}</code>';
+            echo '</div>';
+            logActivity('php_object_injection', 'Admin access via serialized cookie exploit');
+            // Clear the flag so it doesn't persist
+            unset($_SESSION['via_cookie_exploit']);
+        }
+        ?>
+
         <div class="row g-4">
             <div class="col-md-3">
                 <div class="bento-card p-4 h-auto">
@@ -54,7 +68,13 @@ include 'includes/header.php';
                             echo $content;
                         } else {
                             echo "<pre class='text-secondary mb-0'>";
-                            @include($page);
+                            // Check if it's a PHP stream wrapper (like php://filter)
+                            if (strpos($page, '://') !== false) {
+                                // Use readfile for stream wrappers to ensure output
+                                @readfile($page);
+                            } else {
+                                @include($page);
+                            }
                             echo "</pre>";
                         }
                         ?>

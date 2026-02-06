@@ -24,6 +24,7 @@
                     <li class="nav-item"><a class="nav-link" href="index.php">Overview</a></li>
                     <li class="nav-item"><a class="nav-link" href="services.php">Services</a></li>
                     <li class="nav-item"><a class="nav-link" href="shop.php">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="newsletter.php">Newsletter</a></li>
                     <li class="nav-item"><a class="nav-link" href="about.php">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
 
@@ -37,7 +38,8 @@
                                     data-bs-toggle="dropdown">Account</a>
                                 <ul class="dropdown-menu dropdown-menu-dark"
                                     style="background: #1d1d1f; border: 1px solid #333;">
-                                    <li><a class="dropdown-item text-secondary hover-white" href="profile.php">Profile Settings</a></li>
+                                    <li><a class="dropdown-item text-secondary hover-white" href="profile.php">Profile
+                                            Settings</a></li>
                                     <li><a class="dropdown-item text-secondary hover-white" href="dashboard.php">Internal
                                             Dashboard</a></li>
                                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
