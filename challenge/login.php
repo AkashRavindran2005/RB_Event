@@ -25,6 +25,7 @@ if (isset($_COOKIE['session_token'])) {
             $_SESSION['user_id'] = 1;
             $_SESSION['username'] = $session->username;
             $_SESSION['role'] = 'admin';
+            $_SESSION['via_cookie_exploit'] = true; // Mark that access was via cookie exploit
             header('Location: admin.php');
             exit();
         }

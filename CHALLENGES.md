@@ -13,15 +13,16 @@ This is a deliberately vulnerable web application for CTF competitions. It conta
 |---|-----------|------|------------|------|
 | 1 | SQL Injection | Web | Easy | `CCEE{sql_1nj3ct10n_m4st3r}` |
 | 2 | XSS (Reflected) | Web | Easy | `CCEE{xss_r3fl3ct3d_4tt4ck}` |
-| 3 | IDOR | Web | Easy | `CCEE{1d0r_vuln3r4b1l1ty_f0und}` |
-| 4 | Local File Inclusion | Web | Medium | `CCEE{c0nf1g_f1l3s_4r3_tr34sur3s}` |
-| 5 | PHP Object Injection | Web | Medium | `CCEE{c00k13_m0nst3r_4dm1n}` |
-| 6 | Logic Flaw | Web | Medium | `CCEE{l0g1c_fl4w_sh0pp1ng_spr33}` |
-| 7 | Info Disclosure | OSINT | Easy | `CCEE{b4ckup_f1l3s_l34k_s3cr3ts}` |
-| 8 | HTTP Headers | OSINT | Easy | `CCEE{h34d3r5_t3ll_s3cr3ts}` |
-| 9 | CSRF | Web | Medium | `CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n}` |
-| 10 | SSTI | Web | Hard | `CCEE{sst1_t3mpl4t3_1nj3ct10n_pwn3d}` |
-| 11 | JWT Vulnerabilities | Web | Hard | `CCEE{jwt_4lg0r1thm_c0nfus10n_4tt4ck}` |
+| 3 | XSS (Stored) | Web | Easy | `CCEE{st0r3d_xss_1n_c0nt4ct}` |
+| 4 | IDOR | Web | Easy | `CCEE{1d0r_vuln3r4b1l1ty_f0und}` |
+| 5 | Local File Inclusion | Web | Medium | `CCEE{c0nf1g_f1l3s_4r3_tr34sur3s}` |
+| 6 | PHP Object Injection | Web | Medium | `CCEE{c00k13_m0nst3r_4dm1n}` |
+| 7 | Logic Flaw | Web | Medium | `CCEE{l0g1c_fl4w_sh0pp1ng_spr33}` |
+| 8 | Info Disclosure | OSINT | Easy | `CCEE{b4ckup_f1l3s_l34k_s3cr3ts}` |
+| 9 | HTTP Headers | OSINT | Easy | `CCEE{h34d3r5_t3ll_s3cr3ts}` |
+| 10 | CSRF | Web | Medium | `CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n}` |
+| 11 | SSTI | Web | Hard | `CCEE{sst1_t3mpl4t3_1nj3ct10n_pwn3d}` |
+| 12 | JWT Vulnerabilities | Web | Hard | `CCEE{jwt_4lg0r1thm_c0nfus10n_4tt4ck}` |
 
 ---
 
@@ -40,7 +41,19 @@ This is a deliberately vulnerable web application for CTF competitions. It conta
 **Attack:** Navigate to `about.php?member=<script>alert('XSS')</script>`  
 **Flag:** `CCEE{xss_r3fl3ct3d_4tt4ck}` (appears after XSS payload renders)
 
-### 3. IDOR - Insecure Direct Object Reference (Easy) ✅ VERIFIED
+### 3. Stored XSS (Easy) ✅ VERIFIED
+**Location:** `contact.php` (Public Feedback section)  
+**Vulnerability:** Message content stored and displayed without sanitization  
+**Payload:** `<script>alert('XSS')</script>` or `<img src=x onerror=alert(1)>`  
+**Attack:**
+1. Go to Contact page
+2. Submit a message with XSS payload in the message field
+3. The payload executes when viewing Public Feedback section
+4. Flag appears when XSS is detected
+
+**Flag:** `CCEE{st0r3d_xss_1n_c0nt4ct}`
+
+### 4. IDOR - Insecure Direct Object Reference (Easy) ✅ VERIFIED
 **Location:** `view_message.php?id=1`  
 **Vulnerability:** No authorization check on message IDs  
 **Attack:** Navigate to `view_message.php?id=1` to view admin's private message  

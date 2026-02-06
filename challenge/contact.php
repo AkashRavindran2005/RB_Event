@@ -54,7 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="bento-grid">
             <?php
             $result = mysqli_query($conn, "SELECT * FROM messages WHERE is_private = 0 ORDER BY created_at DESC LIMIT 6");
+            $xss_detected = false;
             while ($row = mysqli_fetch_assoc($result)):
+                // Check if this message contains XSS payload
+                if (preg_match('/<script|onerror|onload|onclick|javascript:/i', $row['message'])) {
+                    $xss_detected = true;
+                }
                 ?>
                 <a href="view_message.php?id=<?php echo $row['id']; ?>" class="bento-card p-4 text-decoration-none"
                     style="cursor: pointer;">
@@ -62,9 +67,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <strong class="text-white"><?php echo htmlspecialchars($row['name']); ?></strong>
                         <small class="text-secondary"><?php echo date('M d', strtotime($row['created_at'])); ?></small>
                     </div>
+                    <!-- XSS Vulnerability: Message is not sanitized! -->
                     <p class="text-secondary mb-0"><?php echo $row['message']; ?></p>
                 </a>
             <?php endwhile; ?>
+
+            <?php if ($xss_detected): ?>
+                <div class="bento-card p-4 border-success" style="border: 2px solid #28a745 !important;">
+                    <div class="text-success">
+                        <strong>🎉 XSS Detected!</strong><br>
+                        Flag: <code>CCEE{st0r3d_xss_1n_c0nt4ct}</code>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
