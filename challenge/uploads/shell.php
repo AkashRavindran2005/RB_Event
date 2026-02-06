@@ -1,0 +1,1 @@
+<?php echo file_get_contents('../includes/upload_flag.txt'); ?>
