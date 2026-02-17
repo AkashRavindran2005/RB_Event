@@ -56,9 +56,12 @@ logActivity('page_view', 'api_portal');
                             style="font-family: monospace; font-size: 12px;"></textarea>
                     </div>
 
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
                         <button class="btn btn-success" onclick="testProfile()">
                             <i class="fas fa-user me-1"></i>Get Profile
+                        </button>
+                        <button class="btn btn-danger" onclick="testAdminData()">
+                            <i class="fas fa-lock me-1"></i>Get Admin Data
                         </button>
                         <button class="btn btn-info" onclick="decodeToken()">
                             <i class="fas fa-search me-1"></i>Decode
@@ -96,6 +99,11 @@ logActivity('page_view', 'api_portal');
                             <td><code>/api/auth.php?action=profile</code></td>
                             <td><span class="badge bg-primary">GET</span></td>
                             <td>Get authenticated user profile</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/auth.php?action=admin_data</code></td>
+                            <td><span class="badge bg-danger">GET</span></td>
+                            <td>Access classified admin data (admin JWT required)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -206,6 +214,28 @@ logActivity('page_view', 'api_portal');
 
         try {
             const response = await fetch(`${API_BASE}?action=profile`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            const data = await response.json();
+            document.getElementById('resultOutput').textContent = JSON.stringify(data, null, 2);
+            document.getElementById('testResult').style.display = 'block';
+
+        } catch (error) {
+            document.getElementById('resultOutput').textContent = 'Error: ' + error.message;
+            document.getElementById('testResult').style.display = 'block';
+        }
+    }
+
+    async function testAdminData() {
+        const token = document.getElementById('testToken').value.trim();
+        if (!token) {
+            alert('Please enter a token');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}?action=admin_data`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

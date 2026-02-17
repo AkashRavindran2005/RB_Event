@@ -18,14 +18,15 @@ include 'includes/header.php';
 
         <?php
         // Check if user got here via PHP Object Injection (cookie exploit)
-        // Only shows flag when accessed via the exploit path, not normal admin login
+        // Only shows hint when accessed via the exploit path, not normal admin login
         if (isset($_SESSION['via_cookie_exploit']) && $_SESSION['via_cookie_exploit'] === true) {
-            echo '<div class="alert alert-success mb-4">';
-            echo '<strong>🎉 Congratulations!</strong> You accessed the admin panel via cookie manipulation!<br>';
-            echo 'Flag: <code>CCEE{c00k13_m0nst3r_4dm1n}</code>';
+            $_SESSION['obj_injection_solved'] = true;
+            echo '<div class="alert alert-warning mb-4" style="background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.3);">';
+            echo '<strong>🔓 Cookie Exploit Detected!</strong> You accessed the admin panel via cookie manipulation.<br>';
+            echo 'Navigate to <a href="?file=admin_settings" class="text-warning fw-bold">Settings</a> to claim your reward.';
             echo '</div>';
             logActivity('php_object_injection', 'Admin access via serialized cookie exploit');
-            // Clear the flag so it doesn't persist
+            // Clear the exploit flag so it doesn't persist
             unset($_SESSION['via_cookie_exploit']);
         }
         ?>

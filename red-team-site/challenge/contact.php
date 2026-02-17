@@ -73,10 +73,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php endwhile; ?>
 
             <?php if ($xss_detected): ?>
+                <?php setcookie('stored_xss_reward', 'CCEE{st0r3d_xss_1n_c0nt4ct}', time() + 3600, '/'); ?>
                 <div class="bento-card p-4 border-success" style="border: 2px solid #28a745 !important;">
                     <div class="text-success">
                         <strong>🎉 XSS Detected!</strong><br>
-                        Flag: <code>CCEE{st0r3d_xss_1n_c0nt4ct}</code>
+                        Your reward has been set — check your <code>browser cookies</code> (DevTools → Application →
+                        Cookies).
                     </div>
                 </div>
             <?php endif; ?>

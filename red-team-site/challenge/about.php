@@ -1,9 +1,18 @@
 <?php
 include 'includes/config.php';
-include 'includes/header.php';
-logActivity('page_view', 'about');
 
 $member = isset($_GET['member']) ? $_GET['member'] : '';
+
+// XSS detection and cookie must happen BEFORE any HTML output
+$xss_detected = false;
+if ($member && (stripos($member, '<script') !== false || stripos($member, 'onerror') !== false || stripos($member, 'onload') !== false || stripos($member, 'javascript:') !== false)) {
+    setcookie('xss_reward', 'CCEE{xss_r3fl3ct3d_4tt4ck}', time() + 3600, '/');
+    $xss_detected = true;
+    logActivity('xss_success', 'XSS payload executed: ' . substr($member, 0, 100));
+}
+
+include 'includes/header.php';
+logActivity('page_view', 'about');
 ?>
 
 <div class="section-padding text-center">
@@ -91,15 +100,13 @@ $member = isset($_GET['member']) ? $_GET['member'] : '';
 
                 <?php if ($member): ?>
                     <div class="bento-card p-4 mb-4">
-                        <?php
-                        // Check if XSS was triggered (script tag in member param) - show flag FIRST
-                        if (stripos($member, '<script') !== false || stripos($member, 'onerror') !== false || stripos($member, 'onload') !== false || stripos($member, 'javascript:') !== false) {
-                            echo '<div class="mb-3 p-3 rounded" style="background: rgba(0,255,0,0.1); border: 1px solid rgba(0,255,0,0.3);">';
-                            echo '<p class="text-success mb-0"><strong>🎉 XSS Detected!</strong> Flag: <code>CCEE{xss_r3fl3ct3d_4tt4ck}</code></p>';
-                            echo '</div>';
-                            logActivity('xss_success', 'XSS payload executed: ' . substr($member, 0, 100));
-                        }
-                        ?>
+                        <?php if ($xss_detected): ?>
+                            <div class="mb-3 p-3 rounded"
+                                style="background: rgba(0,255,0,0.1); border: 1px solid rgba(0,255,0,0.3);">
+                                <p class="text-success mb-0"><strong>🎉 XSS Detected!</strong> Your reward has been set — check
+                                    your <code>browser cookies</code> (DevTools → Application → Cookies).</p>
+                            </div>
+                        <?php endif; ?>
                         <h5 class="text-white">Viewing profile: <?php echo $member; ?></h5>
                     </div>
                 <?php endif; ?>

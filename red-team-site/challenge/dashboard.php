@@ -12,11 +12,24 @@ if (!isset($_SESSION['user_id'])) {
 include 'includes/header.php';
 
 $name = isset($_GET['name']) ? $_GET['name'] : $_SESSION['username'];
+
+$sqli_flag = '';
+if (isset($_SESSION['sqli_bypassed']) && $_SESSION['sqli_bypassed'] === true) {
+    $sqli_flag = '<div class="alert alert-success mb-4" style="background: rgba(0,255,0,0.1); border: 1px solid rgba(0,255,0,0.3);">'
+        . '<strong>🎉 SQL Injection Successful!</strong><br>'
+        . 'You bypassed authentication via SQL Injection.<br>'
+        . 'Flag: <code>CCEE{sql_1nj3ct10n_m4st3r}</code></div>';
+    unset($_SESSION['sqli_bypassed']);
+}
 ?>
 
 <div class="section-padding">
     <div class="container-custom">
         <h1 class="display-text mb-5">Welcome, <?php echo $name; ?>.</h1>
+
+        <?php if ($sqli_flag): ?>
+            <?php echo $sqli_flag; ?>
+        <?php endif; ?>
 
         <h2 class="mb-4">Dashboard Overview</h2>
 
