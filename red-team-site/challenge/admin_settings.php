@@ -1,3 +1,10 @@
+<?php if (isset($_SESSION['obj_injection_solved']) && $_SESSION['obj_injection_solved'] === true): ?>
+    <div class="alert alert-success mb-4" style="background: rgba(0,255,0,0.1); border: 1px solid rgba(0,255,0,0.3);">
+        <strong>🎉 Congratulations!</strong> You exploited PHP Object Injection to reach the admin settings.<br>
+        Flag: <code>CCEE{c00k13_m0nst3r_4dm1n}</code>
+    </div>
+    <?php unset($_SESSION['obj_injection_solved']); ?>
+<?php endif; ?>
 <h5 class="text-white mb-3">Global Settings</h5>
 <form>
     <div class="mb-3">

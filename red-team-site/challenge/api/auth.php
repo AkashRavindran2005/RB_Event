@@ -128,9 +128,8 @@ switch ($action) {
                     echo json_encode([
                         'success' => true,
                         'message' => 'Welcome, Admin!',
-                        'flag' => 'CCEE{jwt_4lg0r1thm_c0nfus10n_4tt4ck}',
                         'data' => $payload,
-                        'secret_info' => 'You have unlocked admin access via JWT manipulation!'
+                        'next_step' => 'Admin access confirmed. Access the restricted endpoint: /api/auth.php?action=admin_data for classified information.'
                     ]);
                 } else {
                     echo json_encode([
@@ -177,6 +176,35 @@ switch ($action) {
         }
         break;
 
+    case 'admin_data':
+        // Restricted admin endpoint - requires admin JWT
+        $authHeader = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
+
+        if (preg_match('/Bearer\s+(.+)/', $authHeader, $matches)) {
+            $token = $matches[1];
+            $payload = verifyJWT($token, $JWT_SECRET);
+
+            if ($payload && isset($payload['role']) && $payload['role'] === 'admin') {
+                logActivity('jwt_flag', 'Admin data accessed via forged JWT');
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Classified admin data retrieved.',
+                    'flag' => 'CCEE{jwt_4lg0r1thm_c0nfus10n_4tt4ck}',
+                    'classified' => [
+                        'internal_api_keys' => 'REDACTED',
+                        'admin_notes' => 'JWT security review still pending...'
+                    ]
+                ]);
+            } else if ($payload) {
+                echo json_encode(['error' => 'Access denied. Admin role required.']);
+            } else {
+                echo json_encode(['error' => 'Invalid token']);
+            }
+        } else {
+            echo json_encode(['error' => 'No token provided. Use: Authorization: Bearer <token>']);
+        }
+        break;
+
     default:
         echo json_encode([
             'api' => 'CyberTech JWT Authentication API',
@@ -184,7 +212,8 @@ switch ($action) {
             'endpoints' => [
                 'POST /api/auth.php?action=login' => 'Authenticate and get JWT token',
                 'GET /api/auth.php?action=profile' => 'Get profile (requires JWT)',
-                'GET /api/auth.php?action=verify' => 'Debug token contents'
+                'GET /api/auth.php?action=verify' => 'Debug token contents',
+                'GET /api/auth.php?action=admin_data' => 'Access classified admin data (admin JWT required)'
             ],
             'example' => [
                 'login' => '{"username": "guest", "password": "guest"}',
