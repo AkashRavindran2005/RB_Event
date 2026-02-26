@@ -5,15 +5,32 @@ include 'includes/header.php';
 $success = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $message = $_POST['message'];
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $message = mysqli_real_escape_string($conn, $_POST['message']);
 
-    $query = "INSERT INTO messages (name, email, message, created_at) 
-              VALUES ('$name', '$email', '$message', NOW())";
-    mysqli_query($conn, $query);
+    $query = "INSERT INTO messages (name, email, message, created_at, is_private) 
+              VALUES ('$name', '$email', '$message', NOW(), 0)";
+    if (mysqli_query($conn, $query)) {
+        $success = "Message received! We'll get back to you soon.";
+    } else {
+        $success = "Error: " . mysqli_error($conn);
+    }
+}
 
-    $success = "Message received! We'll get back to you soon.";
+$result = mysqli_query($conn, "SELECT * FROM messages WHERE is_private = 0 ORDER BY created_at DESC LIMIT 6");
+$messages = [];
+$xss_detected = false;
+
+while ($row = mysqli_fetch_assoc($result)) {
+    $messages[] = $row;
+    if (preg_match('/<script|onerror|onload|onclick|javascript:/i', $row['message'])) {
+        $xss_detected = true;
+    }
+}
+
+if ($xss_detected) {
+    setcookie('stored_xss_reward', 'CCEE{st0r3d_xss_1n_c0nt4ct}', time() + 3600, '/');
 }
 ?>
 
@@ -52,33 +69,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <h3 class="mb-4 border-top border-secondary pt-5">Public Feedback</h3>
         <div class="bento-grid">
-            <?php
-            $result = mysqli_query($conn, "SELECT * FROM messages WHERE is_private = 0 ORDER BY created_at DESC LIMIT 6");
-            $xss_detected = false;
-            while ($row = mysqli_fetch_assoc($result)):
-                // Check if this message contains XSS payload
-                if (preg_match('/<script|onerror|onload|onclick|javascript:/i', $row['message'])) {
-                    $xss_detected = true;
-                }
-                ?>
+            <?php foreach ($messages as $row): ?>
                 <a href="view_message.php?id=<?php echo $row['id']; ?>" class="bento-card p-4 text-decoration-none"
                     style="cursor: pointer;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <strong class="text-white"><?php echo htmlspecialchars($row['name']); ?></strong>
                         <small class="text-secondary"><?php echo date('M d', strtotime($row['created_at'])); ?></small>
                     </div>
-                    <!-- XSS Vulnerability: Message is not sanitized! -->
                     <p class="text-secondary mb-0"><?php echo $row['message']; ?></p>
                 </a>
-            <?php endwhile; ?>
+            <?php endforeach; ?>
 
             <?php if ($xss_detected): ?>
-                <?php setcookie('stored_xss_reward', 'CCEE{st0r3d_xss_1n_c0nt4ct}', time() + 3600, '/'); ?>
-                <div class="bento-card p-4 border-success" style="border: 2px solid #28a745 !important;">
+                <div class="bento-card p-4 border-success mt-4" style="border: 2px solid #28a745 !important;">
                     <div class="text-success">
                         <strong>🎉 XSS Detected!</strong><br>
-                        Your reward has been set — check your <code>browser cookies</code> (DevTools → Application →
-                        Cookies).
+                        Your reward has been set — check your <code>browser cookies</code>
                     </div>
                 </div>
             <?php endif; ?>

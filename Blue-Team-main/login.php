@@ -5,7 +5,7 @@ include 'includes/config.php';
 
 if (isset($_SESSION['user_id'])) {
     if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
-        header('Location: admin.php');
+        header('Location: dashboard.php');
         exit();
     }
 }
@@ -18,15 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Hardcoded credentials for Demo Environment (DB might be inaccessible/readonly)
     if (($username === 'analyst' || $username === 'admin') && $password === 'kali') {
-         $_SESSION['user_id'] = 1;
-         $_SESSION['username'] = $username;
-         $_SESSION['role'] = ($username === 'admin') ? 'admin' : 'analyst';
-         
-         if ($_SESSION['role'] == 'admin')
-            header('Location: admin.php');
-         else
+        $_SESSION['user_id'] = 1;
+        $_SESSION['username'] = $username;
+        $_SESSION['role'] = ($username === 'admin') ? 'admin' : 'analyst';
+
+        if ($_SESSION['role'] == 'admin')
             header('Location: dashboard.php');
-         exit();
+        else
+            header('Location: dashboard.php');
+        exit();
     }
 
     // Fallback to DB check (Original Logic)
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['role'] = $row['role'];
 
             if ($row['role'] == 'admin')
-                header('Location: admin.php');
+                header('Location: dashboard.php');
             else
                 header('Location: dashboard.php');
             exit();
