@@ -139,6 +139,14 @@
             color: #ff4136;
             text-shadow: 0 0 5px rgba(255, 65, 54, 0.5);
         }
+        
+        
+        /* New Classes for coloring */
+        .text-red { color: #ff5f56; }
+        .text-yellow { color: #ffbd2e; }
+        .text-green { color: #27c93f; }
+        .text-blue { color: #5aa9e6; }
+        
     </style>
 </head>
 <body>
@@ -168,77 +176,104 @@
         const history = document.getElementById('history');
         const input = document.getElementById('command-input');
 
+        // Helper: Color Text
+        const color = (text, cls) => `<span class="text-${cls}">${text}</span>`;
+        
+        // Helper: Delay
+        const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+        // Command Logic
         const COMMANDS = {
-            'help': () => `
-Investigative Commands:
-  last        - Display recent system logins
-  netstat -ant - Show active network connections
-  ps aux       - List all running processes
-  whois <ip>  - Query threat intelligence for IP
-  clear       - Clear the terminal screen
-  help        - Show this help menu
-            `,
-            'last': () => `
-USER     TTY      FROM              LOGIN TIME   STATUS
-test     pts/0    192.168.10.25    Jul 12 16:20  logged in
-root     tty2     CONSOLE           Jul 07 08:06  08:09 (00:03)
-guest    pts/1    192.168.1.75     Jul 12 10:25  00:02 (15:20)
-cyrus    cron     :0                Jul 03 04:07  04:07 (00:00)
-news     cron     :0                Jul 03 04:14  04:14 (00:00)
-            `.trim(),
-            'netstat': (args) => {
-                if (args === '-ant') {
-                    return `
-Active Internet connections (servers and established)
-Proto Recv-Q Send-Q Local Address           Foreign Address         State      
-tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN     
-tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN     
-tcp        0      0 0.0.0.0:3306            0.0.0.0:*               LISTEN     
-tcp        0      0 10.0.0.5:80             192.168.10.25:54321     ESTABLISHED
-tcp        0      0 10.0.0.5:22             192.168.1.50:51223      ESTABLISHED
-                    `.trim();
-                }
-                return 'Usage: netstat -ant';
-            },
-            'ps': (args) => {
-                if (args === 'aux') {
-                    return `
-USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-root         1  0.0  0.1  22536  2312 ?        Ss   Jun14   0:02 /sbin/init
-root       501  0.0  0.2  45120  4100 ?        S    Jun14   0:05 /usr/sbin/sshd
-www-data  1024  0.5  1.2 245360 25412 ?        S    Jul12   0:15 /usr/sbin/apache2 -k start
-www-data  1025  0.0  0.8 245360 18210 ?        S    Jul12   0:08 /usr/sbin/apache2 -k start
-mysql     2201  0.2  4.5 1254320 95412 ?       Ssl  Jun14   4:22 /usr/sbin/mysqld
-                    `.trim();
-                }
-                return 'Usage: ps aux';
-            },
-            'clear': () => {
-                history.innerHTML = '';
-                return null;
-            },
-            'ping': (args) => {
-                if (!args) return 'Usage: ping <host>';
+            'help': async () => {
                 return `
-PING ${args} (${args}) 56(84) bytes of data.
-64 bytes from ${args}: icmp_seq=1 ttl=64 time=0.045 ms
-64 bytes from ${args}: icmp_seq=2 ttl=64 time=0.052 ms
-64 bytes from ${args}: icmp_seq=3 ttl=64 time=0.048 ms
-64 bytes from ${args}: icmp_seq=4 ttl=64 time=0.049 ms
---- ${args} ping statistics ---
-4 packets transmitted, 4 received, 0% packet loss, time 3000ms
-                `.trim();
+<span class="text-yellow">AVAILABLE COMMANDS:</span>
+  <span class="text-green">scan</span> &lt;target&gt;      - Run comprehensive port scan (Nmap)
+  <span class="text-green">analyze</span> &lt;target&gt;   - Generate Threat Intelligence Report
+  <span class="text-green">whois</span> &lt;target&gt;     - Query ASN and Registrar info
+  <span class="text-green">clear</span>               - Clear terminal screen
+  <span class="text-green">history</span>             - Show command history
+  <span class="text-green">exit</span>                - Close session
+`;
             },
-            'whois': (args) => {
-                if (!args) return 'Usage: whois <ip>';
+            'scan': async (args) => {
+                if (!args) return '<span class="text-red">Error: Target IP required. Usage: scan &lt;ip&gt;</span>';
+                
+                addLine(`Starting Nmap 7.94 ( https://nmap.org ) at ${new Date().toTimeString().split(' ')[0]}`);
+                await delay(500);
+                addLine(`Initiating SYN Stealth Scan against ${args}...`);
+                await delay(1000);
+                addLine(`Scanning ${args} [1000 ports]`);
+                await delay(1200);
+                addLine(`Discovered open port 80/tcp on ${args}`);
+                await delay(300);
+                addLine(`Discovered open port 22/tcp on ${args}`);
+                await delay(300);
+                addLine(`Discovered open port 443/tcp on ${args}`);
+                
                 return `
+Completed SYN Stealth Scan against ${args} in 3.14s
+<span class="text-green">PORT    STATE SERVICE     VERSION</span>
+22/tcp  open  ssh         OpenSSH 8.2p1 Ubuntu 4ubuntu0.5
+80/tcp  open  http        Apache httpd 2.4.41 ((Ubuntu))
+443/tcp open  ssl/http    Apache httpd 2.4.41
+3306/tcp open mysql       MySQL 8.0.28-0ubuntu0.20.04.3
+
+<span class="text-yellow">OS details:</span> Linux 4.15 - 5.6, Linux 5.0 - 5.4
+<span class="text-yellow">Aggressive OS guesses:</span> Linux 5.0 (96%), Linux 5.4 (96%)
+<span class="text-yellow">Network Distance:</span> 12 hops
+<span class="text-red">TRACEROUTE (using port 443/tcp)</span>
+HOP RTT      ADDRESS
+1   0.45 ms  192.168.1.1
+... 
+12  12.00 ms ${args}
+
+Nmap done: 1 IP address (1 host up) scanned in 3.45 seconds
+`;
+            },
+            'analyze': async (args) => {
+                 if (!args) return '<span class="text-red">Error: Target IP required. Usage: analyze &lt;ip&gt;</span>';
+                 
+                 addLine(`[+] Querying local threat database for ${args}...`);
+                 await delay(800);
+                 addLine(`[+] correlate_logs.py --target ${args}`);
+                 await delay(800);
+                 addLine(`[+] Analyzing behavioral patterns...`);
+                 await delay(1000);
+                 
+                 const riskScore = Math.floor(Math.random() * (100 - 60 + 1) + 60); // Random 60-100
+                 
+                 return `
+<span class="text-yellow">--- THREAT INTELLIGENCE REPORT ---</span>
+<span class="text-green">Target:</span>       ${args}
+<span class="text-green">Risk Score:</span>   <span class="text-red">${riskScore}/100 (CRITICAL)</span>
+<span class="text-green">Confidence:</span>   High (92%)
+<span class="text-green">ISP:</span>          DigitalOcean, LLC
+<span class="text-green">Location:</span>     Frankfurt, Germany (DE)
+<span class="text-green">ASN:</span>          AS14061
+
+<span class="text-yellow">--- DETECTED ANOMALIES ---</span>
+[!] <span class="text-red">Matches known botnet signature (Mirai Variant)</span>
+[!] High frequency scanning detected (Port 22, 23, 80)
+[!] Multiple failed authentication attempts (SSH Root)
+[!] Correlated with CVE-2023-XXXX exploit attempts
+
+<span class="text-yellow">--- RECOMMENDED ACTIONS ---</span>
+1. <span class="text-green">Block subnet 192.168.0.0/24 immediately.</span>
+2. Reset credentials for compromised accounts.
+3. Patch OpenSSH services.
+`;
+            },
+            'whois': async (args) => {
+                if (!args) return '<span class="text-red">Error: Target IP required. Usage: whois &lt;ip&gt;</span>';
+                await delay(500);
+                 return `
 % This is the RIPE Database query service.
 % The objects are in RPSL format.
 
 inetnum:        ${args} - ${args}
 netname:        SUSPICIOUS-NET-BLK-01
 descr:          Simulated Malicious Actor Network
-country:        XX
+country:        DE
 admin-c:        ACT1-RIPE
 tech-c:         ACT1-RIPE
 status:         ASSIGNED PA
@@ -248,16 +283,47 @@ last-modified:  2024-02-01T12:00:00Z
 source:         RIPE
 
 person:         Bad Actor
-address:        1234 Dark Web Ave
+address:        1234 Dark Web Ave, Frankfurt
 phone:          +00 000 000 000
 nic-hdl:        ACT1-RIPE
 mnt-by:         MAINT-Simulated
 created:        2024-01-01T12:00:00Z
 last-modified:  2024-02-01T12:00:00Z
 source:         RIPE
-                `.trim();
+                 `;
+            },
+             'clear': async () => {
+                history.innerHTML = '';
+                return ''; // No output, just clears
+            },
+            'history': async () => {
+                 // Mock history
+                 return `
+   1  scan 192.168.1.5
+   2  analyze 192.168.1.5
+   3  whois 192.168.1.5
+   4  exit
+                 `;
+            },
+             'exit': async () => {
+                 window.close();
+                 return 'Session terminated.';
             }
         };
+
+        // UI Logic
+        async function processCommand(cmd) {
+            const parts = cmd.split(' ');
+            const baseCmd = parts[0].toLowerCase();
+            const args = parts.slice(1).join(' ');
+
+            if (COMMANDS[baseCmd]) {
+                const output = await COMMANDS[baseCmd](args);
+                if (output) addLine(output);
+            } else {
+                addLine(`<span class="text-red">Command not found: ${baseCmd}. Type 'help' for available commands.</span>`);
+            }
+        }
 
         function addLine(text, isCommand = false) {
             const div = document.createElement('div');
@@ -268,29 +334,20 @@ source:         RIPE
                 div.innerHTML = text;
             }
             history.appendChild(div);
-            body.scrollTop = body.scrollHeight;
+            // Smooth scroll to bottom
+            setTimeout(() => {
+                body.scrollTop = body.scrollHeight;
+            }, 10);
         }
 
-        input.addEventListener('keydown', (e) => {
+        input.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
                 const cmd = input.value.trim();
                 input.value = '';
 
                 if (cmd) {
                     addLine(cmd, true);
-                    
-                    const parts = cmd.split(' ');
-                    const baseCmd = parts[0];
-                    const args = parts.slice(1).join(' ');
-
-                    if (COMMANDS[baseCmd]) {
-                        const output = COMMANDS[baseCmd](args);
-                        if (output !== null) {
-                            setTimeout(() => addLine(output), 50);
-                        }
-                    } else {
-                        setTimeout(() => addLine(`command not found: ${cmd}`), 50);
-                    }
+                    await processCommand(cmd);
                 }
             }
         });
@@ -300,12 +357,18 @@ source:         RIPE
         const target = urlParams.get('target');
         
         if (target) {
+            // Clear previous history for a clean start on window reuse
+            history.innerHTML = '';
+            
             setTimeout(() => {
-                // Display target connection message instead of auto-typing command
-                addLine(`Target acquired: ${target}`);
-                addLine(`Initiating manual investigation protocol...`);
-                input.focus();
-            }, 500);
+                const cmd = `analyze ${target}`;
+                // Simulate typing: Add to history as if user typed it
+                addLine(cmd, true); 
+                // Clear input (so it doesn't double run if user hits Enter)
+                input.value = '';
+                // Run command
+                processCommand(cmd);
+            }, 300);
         }
 
         // Click focus fallback

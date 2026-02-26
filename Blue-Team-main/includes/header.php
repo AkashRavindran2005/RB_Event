@@ -25,11 +25,12 @@
 
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
-                             <li class="nav-item"><a class="nav-link text-secondary" href="admin.php">Admin</a></li>
+                            <li class="nav-item"><a class="nav-link text-secondary" href="dashboard.php">Admin</a></li>
                         <?php endif; ?>
                         <li class="nav-item ms-3">
-                             <span class="text-secondary me-3 small">Welcome, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Analyst'); ?></span>
-                             <a class="btn btn-outline-danger btn-sm" href="logout.php">Sign Out</a>
+                            <span class="text-secondary me-3 small">Welcome,
+                                <?php echo htmlspecialchars($_SESSION['username'] ?? 'Analyst'); ?></span>
+                            <a class="btn btn-outline-danger btn-sm" href="logout.php">Sign Out</a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item ms-3">
