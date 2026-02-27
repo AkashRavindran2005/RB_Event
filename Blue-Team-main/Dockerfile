@@ -16,7 +16,7 @@ COPY . /var/www/html/
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Update Apache config to allow .htaccess if needed
+# Allow .htaccess overrides
 RUN echo '<Directory /var/www/html/> \n\
     Options Indexes FollowSymLinks \n\
     AllowOverride All \n\
@@ -24,4 +24,10 @@ RUN echo '<Directory /var/www/html/> \n\
 </Directory>' > /etc/apache2/conf-available/ctf.conf \
     && a2enconf ctf
 
+# Render uses $PORT — update Apache to listen on it
+RUN sed -i 's/Listen 80/Listen ${PORT:-80}/' /etc/apache2/ports.conf \
+    && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:${PORT:-80}>/' /etc/apache2/sites-enabled/000-default.conf
+
 EXPOSE 80
+
+CMD ["apache2-foreground"]
