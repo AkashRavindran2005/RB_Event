@@ -17,18 +17,7 @@ include 'includes/header.php';
         <h1 class="display-text mb-5">Admin Control Panel</h1>
 
         <?php
-        // Check if user got here via PHP Object Injection (cookie exploit)
-        // Only shows hint when accessed via the exploit path, not normal admin login
-        if (isset($_SESSION['via_cookie_exploit']) && $_SESSION['via_cookie_exploit'] === true) {
-            $_SESSION['obj_injection_solved'] = true;
-            echo '<div class="alert alert-warning mb-4" style="background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.3);">';
-            echo '<strong>🔓 Cookie Exploit Detected!</strong> You accessed the admin panel via cookie manipulation.<br>';
-            echo 'Navigate to <a href="?file=admin_settings" class="text-warning fw-bold">Settings</a> to claim your reward.';
-            echo '</div>';
-            logActivity('php_object_injection', 'Admin access via serialized cookie exploit');
-            // Clear the exploit flag so it doesn't persist
-            unset($_SESSION['via_cookie_exploit']);
-        }
+        // Admin panel content
         ?>
 
         <div class="row g-4">
@@ -62,20 +51,36 @@ include 'includes/header.php';
 
                     <div class="bg-black p-4 rounded border border-secondary" style="min-height: 400px;">
                         <?php
-                        if (file_exists($page . '.php')) {
+                        // Check for stream wrappers FIRST (php://filter, etc.)
+                        // file_exists() returns true for stream wrappers, so we must check manually
+                        if (strpos($page, '://') !== false) {
+                            // Resolve relative resource paths to absolute + add .php if needed
+                            $base = __DIR__ . '/';
+                            $resolved = preg_replace_callback(
+                                '/resource=([^&]+)/',
+                                function ($m) use ($base) {
+                                    $res = $m[1];
+                                    if ($res[0] !== '/') {
+                                        $res = $base . $res;
+                                    }
+                                    if (pathinfo($res, PATHINFO_EXTENSION) === '') {
+                                        $res .= '.php';
+                                    }
+                                    return 'resource=' . $res;
+                                },
+                                $page
+                            );
+                            echo "<pre class='text-success mb-0' style='word-break:break-all;'>";
+                            @readfile($resolved);
+                            echo "</pre>";
+                        } elseif (file_exists($page . '.php')) {
                             ob_start();
                             include($page . '.php');
                             $content = ob_get_clean();
                             echo $content;
                         } else {
                             echo "<pre class='text-secondary mb-0'>";
-                            // Check if it's a PHP stream wrapper (like php://filter)
-                            if (strpos($page, '://') !== false) {
-                                // Use readfile for stream wrappers to ensure output
-                                @readfile($page);
-                            } else {
-                                @include($page);
-                            }
+                            @include($page);
                             echo "</pre>";
                         }
                         ?>

@@ -1,37 +1,7 @@
 <?php
 include 'includes/config.php';
 
-// Vulnerability: PHP Object Injection
-class UserSession
-{
-    public $username;
-    public $role;
-    public $isValid = false;
-
-    function __wakeup()
-    {
-        if ($this->role === 'admin') {
-            $this->isValid = true;
-        }
-    }
-}
-
 $error = "";
-
-if (isset($_COOKIE['session_token'])) {
-    try {
-        $session = unserialize(base64_decode($_COOKIE['session_token']));
-        if ($session && $session->isValid && $session->role === 'admin') {
-            $_SESSION['user_id'] = 1;
-            $_SESSION['username'] = $session->username;
-            $_SESSION['role'] = 'admin';
-            $_SESSION['via_cookie_exploit'] = true; // Mark that access was via cookie exploit
-            header('Location: admin.php');
-            exit();
-        }
-    } catch (Exception $e) {
-    }
-}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
@@ -44,13 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($row = mysqli_fetch_assoc($result)) {
         if ($password === $row['password']) {
-
-            $session = new UserSession();
-            $session->username = $row['username'];
-            $session->role = $row['role'];
-            $session->isValid = true;
-
-            setcookie('session_token', base64_encode(serialize($session)), time() + 3600, "/");
 
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['username'] = $row['username'];
@@ -101,6 +64,7 @@ include 'includes/header.php';
     - config.php.bak was supposed to be deleted
     - Search API at api/search.php needs sanitization
     - Check dashboard headers with curl -I
+    - Network tools page at tools.php — input not sanitized
 -->
 
 <?php include 'includes/footer.php'; ?>

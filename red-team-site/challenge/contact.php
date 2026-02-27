@@ -1,9 +1,9 @@
 <?php
 include 'includes/config.php';
-include 'includes/header.php';
 
 $success = "";
 
+// Handle form submission BEFORE any output
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
+// Fetch public messages and check for XSS BEFORE any output
 $result = mysqli_query($conn, "SELECT * FROM messages WHERE is_private = 0 ORDER BY created_at DESC LIMIT 6");
 $messages = [];
 $xss_detected = false;
@@ -29,9 +30,12 @@ while ($row = mysqli_fetch_assoc($result)) {
     }
 }
 
+// Set cookie BEFORE header.php sends any output
 if ($xss_detected) {
     setcookie('stored_xss_reward', 'CCEE{st0r3d_xss_1n_c0nt4ct}', time() + 3600, '/');
 }
+
+include 'includes/header.php';
 ?>
 
 <div class="section-padding">
@@ -76,6 +80,7 @@ if ($xss_detected) {
                         <strong class="text-white"><?php echo htmlspecialchars($row['name']); ?></strong>
                         <small class="text-secondary"><?php echo date('M d', strtotime($row['created_at'])); ?></small>
                     </div>
+                    <!-- XSS Vulnerability: Message is not sanitized! -->
                     <p class="text-secondary mb-0"><?php echo $row['message']; ?></p>
                 </a>
             <?php endforeach; ?>
@@ -84,7 +89,8 @@ if ($xss_detected) {
                 <div class="bento-card p-4 border-success mt-4" style="border: 2px solid #28a745 !important;">
                     <div class="text-success">
                         <strong>🎉 XSS Detected!</strong><br>
-                        Your reward has been set — check your <code>browser cookies</code>
+                        Your reward has been set — check your <code>browser cookies</code> (DevTools → Application →
+                        Cookies)
                     </div>
                 </div>
             <?php endif; ?>

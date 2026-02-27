@@ -46,6 +46,8 @@
                                         <li><a class="dropdown-item text-secondary hover-white" href="admin.php">Admin Panel</a>
                                         </li>
                                     <?php endif; ?>
+                                    <li><a class="dropdown-item text-secondary hover-white" href="tools.php"><i
+                                                class="fas fa-terminal me-1"></i>Network Tools</a></li>
                                     <li>
                                         <hr class="dropdown-divider border-secondary">
                                     </li>

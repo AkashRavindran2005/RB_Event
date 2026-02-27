@@ -143,7 +143,7 @@ Contact: {{email}}";
                     <form method="POST">
                         <div class="mb-4">
                             <label class="form-label text-secondary">Email Address</label>
-                            <input type="email" name="email" class="form-control" placeholder="Enter your email address"
+                            <input type="text" name="email" class="form-control" placeholder="Enter your email address"
                                 required>
                         </div>
 
