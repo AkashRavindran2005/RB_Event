@@ -21,13 +21,14 @@ RUN echo '<Directory /var/www/html/> \n\
     Options Indexes FollowSymLinks \n\
     AllowOverride All \n\
     Require all granted \n\
-</Directory>' > /etc/apache2/conf-available/ctf.conf \
+    </Directory>' > /etc/apache2/conf-available/ctf.conf \
     && a2enconf ctf
 
-# Render uses $PORT — update Apache to listen on it
-RUN sed -i 's/Listen 80/Listen ${PORT:-80}/' /etc/apache2/ports.conf \
-    && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:${PORT:-80}>/' /etc/apache2/sites-enabled/000-default.conf
+# Startup script — substitutes Render's $PORT into Apache config at runtime
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["/start.sh"]
+

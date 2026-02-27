@@ -6,9 +6,9 @@ $success = "";
 $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $position = $_POST['position'];
+    $name = $_POST['name'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $position = $_POST['position'] ?? '';
 
     if (isset($_FILES['resume'])) {
         $target_dir = "uploads/";

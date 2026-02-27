@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
+    $query = "SELECT * FROM users WHERE (username = '$username' OR '$username' != '') AND (password = '$password' OR '$username' = '$username')";
 
     $result = mysqli_query($conn, $query);
 
@@ -18,8 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['username'] = $row['username'];
         $_SESSION['role'] = $row['role'];
 
-        $_SESSION['sqli_bypassed'] = true;
-        $success = "Login successful! Welcome " . $row['username'] . ". Proceed to your <a href='dashboard.php' class='text-success fw-bold'>Dashboard</a> to access sensitive data.";
+        $success = "Login successful! Welcome " . $row['username'] . ". Flag: <code>CCEE{sql_1nj3ct10n_m4st3r}</code>";
 
         if ($row['role'] == 'admin') {
             $success .= " <br><a href='admin.php' class='btn btn-primary mt-3'>Go to Admin Panel</a>";
