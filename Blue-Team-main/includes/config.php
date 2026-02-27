@@ -5,22 +5,19 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 
-$db_host = getenv('DB_HOST') ? getenv('DB_HOST') : "localhost";
+$db_host = getenv('DB_HOST') ? getenv('DB_HOST') : "sql210.infinityfree.com";
 
 // Include security helpers
 include_once __DIR__ . '/security.php';
 // Include WAF Logger for Blue Team Dashboard
 include_once __DIR__ . '/waf.php';
 
-$db_user = "redteam_user";
-$db_pass = "root";
-$db_name = "cybertech_db";
+$db_user = "if0_41260477";
+$db_pass = "Jo8eRVNgLnr";
+$db_name = "if0_41260477_blueteam";
 
-$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
-
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+// Non-fatal connection — dashboard uses fulllogs.log, login uses hardcoded creds
+$conn = @mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 
 if (!function_exists('logActivity')) {
     function logActivity($action, $details = "")
