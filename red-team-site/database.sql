@@ -28,6 +28,7 @@ CREATE TABLE users (
 CREATE TABLE messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
+    session_id VARCHAR(255) DEFAULT NULL,
     name VARCHAR(100),
     email VARCHAR(100),
     message TEXT,

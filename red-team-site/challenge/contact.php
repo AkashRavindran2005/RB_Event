@@ -9,8 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $message = mysqli_real_escape_string($conn, $_POST['message']);
 
-    $query = "INSERT INTO messages (name, email, message, created_at, is_private) 
-              VALUES ('$name', '$email', '$message', NOW(), 0)";
+    $session_id = session_id();
+    $query = "INSERT INTO messages (name, email, message, created_at, is_private, session_id) 
+              VALUES ('$name', '$email', '$message', NOW(), 0, '$session_id')";
     if (mysqli_query($conn, $query)) {
         $success = "Message received! We'll get back to you soon.";
     } else {
@@ -19,7 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Fetch public messages and check for XSS BEFORE any output
-$result = mysqli_query($conn, "SELECT * FROM messages WHERE is_private = 0 ORDER BY created_at DESC LIMIT 6");
+$session_id = session_id();
+$result = mysqli_query($conn, "SELECT * FROM messages WHERE is_private = 0 AND (session_id = '$session_id' OR session_id IS NULL) ORDER BY created_at DESC LIMIT 6");
 $messages = [];
 $xss_detected = false;
 
